@@ -1,0 +1,343 @@
+/* Reference: geomaritima.com.br, --geo-green and --geo-purple, 2026-09-10.
+   Darker shades below are UI adaptations for legibility, not official swatches. */
+.delete-button {
+  color: #a03243;
+  border-color: #e6c7ce;
+  background: #fff7f8;
+}
+.delete-button:hover {
+  background: #f9e5e9;
+}
+:root {
+  --geo-green: hsl(157 48% 74%);
+  --geo-purple: hsl(245 31% 59%);
+  --geo-purple-dark: #514681;
+  --geo-ink: #302b46;
+  color: var(--geo-ink);
+  background: #f7f7fa;
+}
+.media-actions {
+  padding: 0 16px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+.target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  padding: 0 24px 20px;
+}
+.target-grid label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #ddd4e8;
+  border-radius: 8px;
+  padding: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+.target-grid label:has(input:checked) {
+  background: #eee9f7;
+  border-color: #8276b7;
+}
+.target-grid small {
+  display: block;
+  margin-top: 5px;
+}
+.target-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px 22px;
+  flex-wrap: wrap;
+}
+.target-footer span {
+  font-size: 12px;
+  color: #78688c;
+}
+.channel-home {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 35px;
+  min-height: 100vh;
+}
+.channel-home header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 65px;
+}
+.channel-home .brand {
+  color: #514681;
+}
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 35px;
+}
+.channel-card {
+  padding: 30px;
+  background: white;
+  border: 2px solid #e4deed;
+  border-radius: 12px;
+  display: block;
+}
+.channel-card:hover,
+.channel-card:focus-visible {
+  border-color: #8276b7;
+  background: #f1edf8;
+  outline: 3px solid #9dddc4;
+  outline-offset: 3px;
+}
+.channel-symbol {
+  font-size: 36px;
+  color: #8276b7;
+  display: block;
+  margin-bottom: 25px;
+}
+.channel-card strong {
+  color: #514681;
+}
+.sidebar {
+  background: #302b46;
+  overflow-y: auto;
+}
+.sidebar .brand span,
+.brand span {
+  color: var(--geo-green);
+}
+.brand i,
+.green-dot,
+.top-dot,
+.signal i {
+  background: var(--geo-green);
+}
+.workspace-label {
+  margin-bottom: 15px;
+  color: #c5bfdc;
+}
+.company-logo {
+  width: 160px;
+  max-width: 100%;
+  height: 92px;
+  object-fit: contain;
+  align-self: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+.nav-link {
+  color: #d1cde0 !important;
+}
+.nav-link > span {
+  color: #aaa0cc;
+}
+.nav-link.active {
+  background: #61558b !important;
+  color: white !important;
+}
+.nav-link.active > span {
+  color: var(--geo-green);
+}
+.nav-link small {
+  background: #4b4268;
+  color: var(--geo-green);
+}
+.sidebar-bottom {
+  padding-top: 25px;
+}
+.sidebar-bottom > p {
+  color: #b0a8c4;
+  border-color: #514865;
+}
+.signal {
+  color: #d1cbdc;
+}
+.avatar {
+  background: #62558b;
+  color: white;
+}
+.user strong {
+  color: white;
+}
+.user small {
+  color: #c0b7d1;
+}
+.primary,
+.upload-button {
+  background: var(--geo-purple-dark);
+  border-color: var(--geo-purple-dark);
+  color: #fff;
+}
+.primary:hover,
+.upload-button:hover {
+  background: #42386e;
+  border-color: #42386e;
+}
+button:hover {
+  background: #eeebf6;
+}
+.text-button {
+  color: var(--geo-purple-dark);
+}
+.eyebrow {
+  color: #796c99;
+}
+.page-heading h1,
+.stat > strong {
+  color: var(--geo-ink);
+}
+.badge.purple {
+  background: #efebf8;
+  color: #65558e;
+}
+.badge.green {
+  background: #e4f5ed;
+  color: #32614c;
+}
+.publish-box {
+  background: #f1edf8;
+  border-color: #ded6ed;
+}
+.publish-box > span {
+  color: #69598e;
+}
+.quick-icon {
+  background: #e4f5ed;
+  color: #3f765f;
+}
+.purple-icon {
+  background: #ece6f5;
+  color: var(--geo-purple-dark);
+}
+.welcome-screen {
+  background:
+    radial-gradient(ellipse at 100% 100%, #786aae 0, transparent 65%), #393153;
+}
+.welcome-screen p {
+  color: #dbd4ea;
+}
+.route-line {
+  color: var(--geo-green);
+}
+.gallery-intro {
+  background: #eeebf5;
+  border-color: #ded7ed;
+}
+.gallery-intro h2 {
+  color: #504071;
+}
+.gallery-intro > span {
+  color: #7c6a99;
+}
+.template-card p span,
+.admin-footer {
+  color: #73618e;
+}
+.editor-preview {
+  background: #f1eef7;
+}
+.editor-fields h3 {
+  color: #786398;
+}
+.weekdays input:checked + span {
+  background: var(--geo-purple-dark);
+}
+input[type="checkbox"] {
+  accent-color: var(--geo-purple-dark);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline-color: var(--geo-purple);
+}
+.login-story {
+  background:
+    radial-gradient(ellipse at 110% 110%, #8070ad, transparent 65%), #302b46;
+}
+.login-copy em {
+  color: var(--geo-green);
+}
+.login-copy .eyebrow,
+.login-copy p {
+  color: #d0c8df;
+}
+.login-form {
+  background: #faf9fc;
+}
+.login-company-logo {
+  width: 210px;
+  max-width: 65%;
+  height: 120px;
+  object-fit: contain;
+  object-position: left;
+  margin-top: 28px;
+}
+.login-copy {
+  padding: 35px 0;
+}
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border: 1px solid #d9d0e8;
+  color: var(--geo-purple-dark);
+  background: #f5f1fa;
+  font-size: 12px;
+}
+.logout-button:hover {
+  background: #e9e1f4;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+}
+#toast {
+  background: #44385e;
+}
+@media (max-width: 850px) {
+  .company-logo {
+    width: 48px;
+    height: 36px;
+    margin: 16px 0 0;
+  }
+  .sidebar nav {
+    margin-top: 18px;
+  }
+  .topbar > div {
+    gap: 8px;
+  }
+  .logout-button {
+    padding: 9px 11px;
+  }
+  .sidebar {
+    overflow-x: hidden;
+  }
+}
+@media (max-width: 600px) {
+  .login-company-logo {
+    width: 140px;
+    height: 80px;
+    margin-top: 14px;
+  }
+  .topbar > span {
+    font-size: 10px;
+  }
+  .topbar .top-dot {
+    display: none;
+  }
+  .logout-button {
+    font-size: 11px;
+  }
+  .topbar > div {
+    font-size: 0;
+  }
+  .logout-button span {
+    font-size: 15px;
+  }
+}

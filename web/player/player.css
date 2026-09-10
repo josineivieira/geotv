@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b1710;
+  cursor: none;
+}
+body {
+  display: grid;
+  place-items: center;
+}
+#screen {
+  width: min(100vw, 177.7778vh);
+  height: min(100vh, 56.25vw);
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+}
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  container-type: inline-size;
+}
+.frame .tv-slide {
+  width: 100%;
+  height: 100%;
+}
+.frame.fade {
+  animation: fade 0.6s ease both;
+}
+.frame.slide {
+  animation: slide 0.5s ease both;
+}
+.frame.zoom {
+  animation: zoom 0.6s ease both;
+}
+.opening {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(ellipse at bottom right, #365f3c, #163f2c 65%);
+  color: #fff;
+  font-family:
+    Segoe UI,
+    Arial,
+    sans-serif;
+}
+.opening strong {
+  font-size: 11cqw;
+  letter-spacing: -0.7cqw;
+  font-weight: 750;
+}
+.opening strong span {
+  font-weight: 300;
+  color: #b6d6a5;
+}
+.opening strong i {
+  display: inline-block;
+  width: 1cqw;
+  height: 1cqw;
+  border-radius: 50%;
+  background: #b6d6a5;
+  margin: 0 0 3cqw 0.8cqw;
+}
+.opening p {
+  font-size: 2cqw;
+  color: #b9cfb7;
+}
+.opening-pulse {
+  width: 6cqw;
+  height: 0.3cqw;
+  background: #b6d6a5;
+  border-radius: 1cqw;
+  margin-top: 4cqw;
+  animation: pulse 2s ease infinite;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translateX(2%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes zoom {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+    transform: scaleX(0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .frame,
+  .opening-pulse {
+    animation: none !important;
+  }
+}

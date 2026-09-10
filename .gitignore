@@ -1,0 +1,13 @@
+storage/*
+!storage/.gitkeep
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+.codex/
+.agents/
+node_modules/
+test-results/
