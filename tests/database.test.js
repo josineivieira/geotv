@@ -175,6 +175,31 @@ test("TLS não pode ser desativado por parâmetros de DATABASE_URL", () => {
   );
 });
 
+test("URL inválida não expõe credenciais e senha codificada é preservada", () => {
+  for (const raw of [
+    "postgresql://user:dummy-secret#value@host:6543/postgres",
+    "postgresql://user:dummy-secret%ZZ@host:6543/postgres",
+    '"postgresql://user:dummy-secret@host:6543/postgres"',
+  ]) {
+    assert.throws(
+      () => postgresConnection(raw),
+      (error) => {
+        assert.match(error.message, /DATABASE_URL inválida/);
+        assert.ok(!error.stack.includes("dummy-secret"));
+        assert.equal(error.cause, undefined);
+        assert.equal(error.input, undefined);
+        return true;
+      },
+    );
+  }
+  const password = "sample#@$%/?";
+  const raw = `postgresql://user:${encodeURIComponent(password)}@host:6543/postgres`;
+  assert.equal(
+    decodeURIComponent(new URL(postgresConnection(raw).url).password),
+    password,
+  );
+});
+
 test("transações PostgreSQL usam a mesma conexão e liberam após falha", async () => {
   const calls = [];
   const client = {

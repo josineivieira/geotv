@@ -129,9 +129,25 @@ export function createDatabase({
 }
 
 export function postgresConnection(raw, ca) {
-  const url = new URL(raw);
-  if (!["postgres:", "postgresql:"].includes(url.protocol))
-    throw new Error("DATABASE_URL deve ser PostgreSQL.");
+  let url;
+  try {
+    url = new URL(raw.trim());
+    if (
+      !["postgres:", "postgresql:"].includes(url.protocol) ||
+      !url.hostname ||
+      url.hash
+    )
+      throw new Error();
+    // Validate escapes before passing credentials to the PostgreSQL driver.
+    decodeURIComponent(url.username);
+    decodeURIComponent(url.password);
+  } catch {
+    // URL parser errors contain the original input, including the password.
+    // Never attach that error as a cause or log the connection string.
+    throw new Error(
+      "DATABASE_URL inválida. No Render, use a URL PostgreSQL sem aspas e codifique os caracteres especiais da senha (por exemplo, # como %23, @ como %40 e % como %25).",
+    );
+  }
   // SSL URL parameters must not override certificate verification.
   for (const key of [
     "sslmode",
