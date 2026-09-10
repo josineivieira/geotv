@@ -33,7 +33,7 @@ function tick() {
     presenter.cancel();
     if (currentId !== null || !screen.querySelector(".opening p"))
       screen.innerHTML =
-        '<div class="opening"><strong>geo<span>tv</span></strong><p>Em breve, novas conexões por aqui.</p></div>';
+        '<div class="opening"><strong>geo<span>tv</span></strong><p>Canal aguardando programação.</p></div>';
     currentId = null;
     return;
   }

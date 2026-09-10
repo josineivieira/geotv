@@ -7,7 +7,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0b1710;
+  background: #211c32;
   cursor: none;
 }
 .fullscreen-button,
@@ -79,12 +79,52 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(ellipse at bottom right, #365f3c, #163f2c 65%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      125deg,
+      transparent 66%,
+      #9ddcc022 66%,
+      #9ddcc022 68%,
+      transparent 68%
+    ),
+    linear-gradient(
+      125deg,
+      transparent 74%,
+      #8076b533 74%,
+      #8076b533 83%,
+      transparent 83%
+    ),
+    radial-gradient(ellipse at top left, #514375, #302943 55%, #211c32);
   color: #fff;
   font-family:
     Segoe UI,
     Arial,
     sans-serif;
+}
+.opening::before {
+  content: "";
+  position: absolute;
+  top: 4cqw;
+  left: 5cqw;
+  width: 15cqw;
+  height: 8cqw;
+  background: url("/assets/geomaritima-logo.png") left center / contain
+    no-repeat;
+}
+.opening::after {
+  content: "CANAL CORPORATIVO · GEOMARÍTIMA";
+  position: absolute;
+  bottom: 4cqw;
+  left: 5cqw;
+  right: 5cqw;
+  padding-top: 1.5cqw;
+  border-top: 1px solid #b1a5d340;
+  color: #b9afd0;
+  font-size: 0.9cqw;
+  letter-spacing: 0.25cqw;
 }
 .opening strong {
   font-size: 11cqw;
@@ -93,24 +133,26 @@ body {
 }
 .opening strong span {
   font-weight: 300;
-  color: #b6d6a5;
+  color: #9ddcc0;
 }
 .opening strong i {
   display: inline-block;
   width: 1cqw;
   height: 1cqw;
   border-radius: 50%;
-  background: #b6d6a5;
+  background: #9ddcc0;
   margin: 0 0 3cqw 0.8cqw;
 }
 .opening p {
   font-size: 2cqw;
-  color: #b9cfb7;
+  color: #d5cfe3;
+  max-width: 75%;
+  text-align: center;
 }
 .opening-pulse {
   width: 6cqw;
   height: 0.3cqw;
-  background: #b6d6a5;
+  background: #9ddcc0;
   border-radius: 1cqw;
   margin-top: 4cqw;
   animation: pulse 2s ease infinite;

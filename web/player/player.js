@@ -70,7 +70,7 @@ function tick() {
     .flatMap(presentationFrames);
   if (!list.length) {
     if (current || !screen.querySelector(".opening p"))
-      opening("Em breve, novas conexões por aqui.");
+      opening("Canal aguardando programação.");
     return;
   }
   if (
