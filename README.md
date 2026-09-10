@@ -4,7 +4,7 @@ Plataforma de canal interno digital com Admin autenticado e Player independente 
 
 ## Executar localmente
 
-Requer Node.js 24 ou superior. O servidor usa módulos nativos; não depende de serviço de banco externo.
+Requer Node.js 24 ou superior. Sem `DATABASE_URL`, usa SQLite e arquivos locais. Com `DATABASE_URL`, usa PostgreSQL e Supabase Storage; veja [Render + Supabase](docs/RENDER.md). A instalação local não depende de banco externo.
 
 ```powershell
 npm ci

@@ -32,6 +32,11 @@ test(
     const server = spawn(process.execPath, ["server/index.js"], {
       env: {
         ...process.env,
+        DATABASE_URL: "",
+        SUPABASE_URL: "",
+        SUPABASE_SECRET_KEY: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        RENDER: "",
         HOST: "127.0.0.1",
         PORT: String(port),
         PUBLIC_ORIGIN: base,

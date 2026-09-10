@@ -10,7 +10,7 @@ export function string(value, name, max = 300, required = true) {
     fail(400, `${name}: valor inválido.`);
   return value.trim();
 }
-export function validateContent(input) {
+export async function validateContent(input) {
   const c = { ...input };
   string(c.title, "Título");
   c.category = string(c.category || "Geral", "Categoria", 80);
@@ -66,7 +66,7 @@ export function validateContent(input) {
   )
     fail(400, "Selecione um arquivo da biblioteca.");
   if (c.fields.media) {
-    const media = db
+    const media = await db
       .prepare("SELECT mime FROM media WHERE url=?")
       .get(c.fields.media);
     if (!media) fail(400, "Arquivo não encontrado na biblioteca.");
@@ -81,35 +81,44 @@ export function validateContent(input) {
     if (c.slides !== undefined) {
       if (!Array.isArray(c.slides) || !c.slides.length || c.slides.length > 60)
         fail(400, "Use entre 1 e 60 telas por apresentação.");
-      c.slides = c.slides.map((slide) => {
-        if (!slide || typeof slide !== "object") fail(400, "Tela inválida.");
-        const media =
-          typeof slide.media === "string"
-            ? db.prepare("SELECT mime FROM media WHERE url=?").get(slide.media)
-            : null;
-        if (!media?.mime.startsWith("image/"))
-          fail(400, "Selecione uma imagem válida em cada tela.");
-        if (
-          !Number.isInteger(slide.duration) ||
-          slide.duration < 5 ||
-          slide.duration > 300
-        )
-          fail(400, "Cada tela deve durar entre 5 e 300 segundos.");
-        if (
-          !["fade", "slide", "zoom", "none"].includes(slide.transition) ||
-          !["contain", "cover"].includes(slide.fit)
-        )
-          fail(400, "Efeito ou enquadramento inválido.");
-        return {
-          media: slide.media,
-          duration: slide.duration,
-          transition: slide.transition,
-          fit: slide.fit,
-          title: string(slide.title || "", "Título da tela", 120, false),
-          message: string(slide.message || "", "Mensagem da tela", 1000, false),
-          showText: !!slide.showText,
-        };
-      });
+      c.slides = await Promise.all(
+        c.slides.map(async (slide) => {
+          if (!slide || typeof slide !== "object") fail(400, "Tela inválida.");
+          const media =
+            typeof slide.media === "string"
+              ? await db
+                  .prepare("SELECT mime FROM media WHERE url=?")
+                  .get(slide.media)
+              : null;
+          if (!media?.mime.startsWith("image/"))
+            fail(400, "Selecione uma imagem válida em cada tela.");
+          if (
+            !Number.isInteger(slide.duration) ||
+            slide.duration < 5 ||
+            slide.duration > 300
+          )
+            fail(400, "Cada tela deve durar entre 5 e 300 segundos.");
+          if (
+            !["fade", "slide", "zoom", "none"].includes(slide.transition) ||
+            !["contain", "cover"].includes(slide.fit)
+          )
+            fail(400, "Efeito ou enquadramento inválido.");
+          return {
+            media: slide.media,
+            duration: slide.duration,
+            transition: slide.transition,
+            fit: slide.fit,
+            title: string(slide.title || "", "Título da tela", 120, false),
+            message: string(
+              slide.message || "",
+              "Mensagem da tela",
+              1000,
+              false,
+            ),
+            showText: !!slide.showText,
+          };
+        }),
+      );
       c.duration = c.slides.reduce((total, slide) => total + slide.duration, 0);
       if (c.duration > 3600)
         fail(400, "A apresentação deve durar no máximo uma hora.");

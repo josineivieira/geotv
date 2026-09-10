@@ -2,6 +2,8 @@
 
 ## Configuração inicial
 
+Para hospedagem com PostgreSQL e Supabase Storage, siga [Render + Supabase](RENDER.md). As instruções de cópia da pasta `storage` abaixo se aplicam ao modo SQLite local; no Supabase, faça backup do banco e dos objetos separadamente.
+
 Execute `npm run setup`, consulte a credencial no `.env` e execute `npm start`. O banco é criado na primeira execução. O administrador só é criado quando não existem usuários e a senha configurada tem pelo menos 12 caracteres.
 
 Variáveis:

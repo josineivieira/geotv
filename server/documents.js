@@ -95,7 +95,7 @@ export async function convertPowerPoint(req, res, user, readBody) {
       pdf.toString("ascii", 0, 5) !== "%PDF-"
     )
       fail(422, "A conversão não produziu um PDF válido dentro do limite.");
-    audit(user, "Importou PowerPoint", null, null, {
+    await audit(user, "Importou PowerPoint", null, null, {
       name,
       size: bytes.length,
     });
