@@ -421,6 +421,21 @@ test(
     await evaluate(`document.querySelector('.channel-card').click()`);
     await waitFor('!!document.querySelector("#screen .tv-slide")');
     assert.equal(await evaluate(`!!document.querySelector('nav')`), false);
+    await command("Runtime.evaluate", {
+      expression: "document.querySelector('.fullscreen-button').click()",
+      userGesture: true,
+    });
+    await waitFor("!!document.fullscreenElement");
+    assert.equal(
+      await evaluate("document.querySelector('.fullscreen-button').hidden"),
+      true,
+    );
+    await evaluate("document.exitFullscreen()");
+    await waitFor("!document.querySelector('.fullscreen-button').hidden");
+    assert.equal(
+      await evaluate("location.pathname.startsWith('/watch/')"),
+      true,
+    );
     await command("Page.navigate", { url: base });
     await waitFor('!!document.querySelector("#channels-logout")');
     await evaluate(`document.querySelector('#channels-logout').click()`);

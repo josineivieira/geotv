@@ -10,6 +10,37 @@ body {
   background: #0b1710;
   cursor: none;
 }
+.fullscreen-button,
+.fullscreen-message {
+  position: fixed;
+  z-index: 1000;
+  right: 24px;
+  bottom: 24px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  background: #302943;
+  color: #fff;
+  font:
+    600 18px/1.4 "Segoe UI",
+    Arial,
+    sans-serif;
+}
+.fullscreen-button {
+  border: 2px solid #a0dbbf;
+  cursor: pointer;
+}
+.fullscreen-button:focus-visible {
+  outline: 4px solid #fff;
+  outline-offset: 4px;
+}
+.fullscreen-message {
+  bottom: 86px;
+  max-width: min(480px, calc(100vw - 48px));
+}
+.fullscreen-button[hidden],
+.fullscreen-message[hidden] {
+  display: none;
+}
 body {
   display: grid;
   place-items: center;
