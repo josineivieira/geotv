@@ -86,9 +86,6 @@ async function sync() {
 }
 const timer = setInterval(tick, 500),
   refresh = setInterval(sync, 10000);
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") location.href = "/";
-});
 window.addEventListener(
   "pagehide",
   () => {
