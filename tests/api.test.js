@@ -12,6 +12,11 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
   const child = spawn(process.execPath, ["server/index.js"], {
     env: {
       ...process.env,
+      DATABASE_URL: "",
+      SUPABASE_URL: "",
+      SUPABASE_SECRET_KEY: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      RENDER: "",
       PORT: String(port),
       HOST: "127.0.0.1",
       PUBLIC_ORIGIN: base,

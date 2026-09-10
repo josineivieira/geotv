@@ -1,39 +1,60 @@
-# GeoTV no Render
+# GeoTV: Render + Supabase
 
-O projeto usa Node.js 24, servidor HTTP próprio e SQLite. Frontend e API ficam no mesmo Web Service. Não precisa criar Postgres para esta instalação: trocar o banco exigiria uma migração do código e dos dados.
+O Render executa o servidor Node.js e o frontend via Docker. O Supabase armazena o PostgreSQL e as mídias. Com essa configuração, os dados persistentes não dependem do disco do Render. SQLite continua disponível somente para instalações locais sem `DATABASE_URL`.
 
-## Configuração
+## Variáveis no Render
 
-1. Envie o código para um repositório privado no GitHub. Não envie `.env`, `storage`, `node_modules` nem backups. O banco e as mídias locais não são parte do deploy.
-2. No Render, escolha **New > Web Service**, conecte o repositório e selecione **Docker**, com `./Dockerfile`. Deixe Docker Command vazio para usar o comando da imagem.
-3. Escolha uma instância paga e confira os custos antes de criar. Conversões de PowerPoint podem exigir mais memória: dimensione com seus arquivos reais.
-4. Adicione um disco persistente com mount path **`/var/data`**. Escolha capacidade suficiente para o banco, mídias e conversões temporárias. Mantenha apenas uma instância deste serviço SQLite.
-5. Configure as variáveis abaixo na área Environment. Substitua o domínio pelo endereço real atribuído ao serviço, sem barra no final.
+Em **Environment**, mantenha as variáveis já cadastradas e confira:
 
-| Variável               | Valor                                               |
-| ---------------------- | --------------------------------------------------- |
-| `PUBLIC_ORIGIN`        | `https://SEU-SERVICO.onrender.com`                  |
-| `GEOTV_ADMIN_EMAIL`    | Seu e-mail de administrador                         |
-| `GEOTV_ADMIN_NAME`     | Seu nome                                            |
-| `GEOTV_ADMIN_PASSWORD` | Senha forte exclusiva, com pelo menos 12 caracteres |
+| Nome                      | Valor                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `DATABASE_URL`            | URL PostgreSQL do pooler Supabase, porta 6543, com a senha real codificada para URL |
+| `SUPABASE_URL`            | URL HTTPS do seu projeto Supabase, como `https://SEU-PROJETO.supabase.co`           |
+| `SUPABASE_SECRET_KEY`     | Chave secreta de servidor, disponível em Settings → API Keys                        |
+| `SUPABASE_STORAGE_BUCKET` | `geotv-media` (padrão; opcional)                                                    |
+| `PUBLIC_ORIGIN`           | URL HTTPS real do GeoTV no Render, sem barra no final                               |
+| `GEOTV_ADMIN_EMAIL`       | E-mail para entrar no GeoTV                                                         |
+| `GEOTV_ADMIN_NAME`        | Nome do administrador                                                               |
+| `GEOTV_ADMIN_PASSWORD`    | Senha do GeoTV com pelo menos 12 caracteres                                         |
 
-O Docker já configura `HOST=0.0.0.0`, `COOKIE_SECURE=true`, `GEOTV_STORAGE=/var/data/geotv` e `LIBREOFFICE_PATH=/usr/bin/libreoffice`. O servidor respeita a variável `PORT` fornecida pelo Render. Não copie o `.env` local: ele contém endereços HTTP da LAN e configurações de cookies locais. `ALLOWED_ORIGINS` pode ficar sem definição quando tudo usa o mesmo domínio. Se alterar o domínio, atualize `PUBLIC_ORIGIN`.
+Se estiver usando as chaves legadas, cadastre `SUPABASE_SERVICE_ROLE_KEY` com a chave **service_role** no lugar de `SUPABASE_SECRET_KEY`. Não use a chave anon/publishable. Não envie chaves no chat, não as coloque no frontend e não versione `.env`.
 
-6. Configure Health Check Path como `/` e inicie o deploy. Esse caminho verifica a resposta HTTP da página, não é um diagnóstico completo do banco.
-7. Abra o endereço HTTPS, faça login, cadastre um conteúdo, envie uma imagem e publique em um canal. Reinicie o serviço e confirme que os dados e a mídia continuam disponíveis. Teste também uma importação de PowerPoint e a reprodução em uma TV.
+`DIRECT_URL` pode continuar cadastrada, mas o servidor não a utiliza: tanto as consultas quanto a criação inicial das tabelas usam `DATABASE_URL`. Não é necessário Prisma nem executar SQL manualmente no painel.
 
-O Docker instala LibreOffice e fontes para converter PowerPoint. A imagem precisa ser construída e validada no Render; preparar estes arquivos não publica o serviço.
+O Docker configura `HOST=0.0.0.0`, `COOKIE_SECURE=true` e LibreOffice. O servidor usa `PORT` fornecida pelo Render. `GEOTV_STORAGE` guarda apenas conversões temporárias no modo Supabase; não é preciso criar disco persistente. Não importe o `.env` local inteiro, pois contém origens HTTP locais.
 
-## Dados que já estão no computador
+## Banco e arquivos
 
-O primeiro deploy com disco vazio cria uma instalação nova. Para levar os dados existentes, será necessário transferir uma cópia consistente de **toda a pasta `storage`**, incluindo banco e mídias, para `/var/data/geotv`. Faça o backup local com o GeoTV parado e planeje a restauração com o serviço de destino parado; não sobrescreva um SQLite em uso. Guarde o backup fora do repositório. As credenciais do banco restaurado serão mantidas; as variáveis de administrador só criam o primeiro usuário em um banco novo.
+Na primeira inicialização, o GeoTV cria as tabelas no schema **geotv**, preservando tabelas e registros existentes. Para vê-las no Table Editor do Supabase, escolha o schema `geotv`. Esse schema não precisa ser exposto na Data API: o backend conecta diretamente ao PostgreSQL e continua validando as permissões do GeoTV. Mantenha-o privado, sem conceder acesso aos papéis anon/authenticated.
 
-Não dependa apenas do disco: mantenha backups consistentes fora do serviço. A instalação local e a hospedada não se sincronizam automaticamente. Reabra os canais pelo novo domínio e refaça o acesso das TVs conforme necessário.
+O administrador inicial só é criado quando não existem usuários. Alterar `GEOTV_ADMIN_PASSWORD` não redefine senhas já cadastradas.
 
-## Limites desta instalação
+O servidor verifica o bucket `geotv-media` e o cria como **privado** se não existir. Também é possível criá-lo manualmente em Storage, com Public bucket desativado. Se o bucket já existir como público, a inicialização para e pede que ele seja configurado como privado.
 
-- O plano gratuito não oferece disco persistente: SQLite e uploads seriam perdidos em reinícios ou deploys.
-- SQLite com disco atende uma instância. Escalar para várias instâncias exige rever banco, armazenamento de mídia e notificações.
-- As URLs diretas dos arquivos de mídia são públicas para quem possuir o link. Avalie isso antes de enviar conteúdo corporativo confidencial para uma hospedagem pública.
+Uploads, exclusões e leitura usam a chave apenas no backend. As apresentações mantêm URLs `/media/...`; vídeos continuam aceitando intervalos de bytes. O servidor não revela URLs assinadas nem chaves ao navegador. A rota `/media/...` mantém o comportamento anterior de acesso por quem possuir o link; bucket privado não equivale a autenticação adicional nessa rota.
 
-Referências oficiais: [discos persistentes](https://render.com/docs/disks), [limitações do plano gratuito](https://render.com/docs/free) e [Web Services](https://render.com/docs/web-services).
+Os limites de upload do Supabase dependem do plano, do limite global e do bucket. O GeoTV aceita imagens até 10 MB e vídeos até 100 MB, mas o limite do Supabase pode ser menor. Nesse caso, reduza o arquivo ou ajuste o limite/plano. Importar PDF/PowerPoint gera imagens das páginas, guardadas no Storage; o original convertido é temporário.
+
+## Deploy e validação
+
+1. No serviço Render, use o repositório GeoTV, branch `main`, runtime **Docker**, Dockerfile `./Dockerfile`, Root Directory e Docker Command vazios.
+2. Use **Virginia** se o projeto Supabase estiver em `us-east-1`.
+3. Salve as variáveis e publique o commit atualizado. Use Health Check Path **`/health`**.
+4. Abra o endereço HTTPS e faça login. Crie conteúdo, envie uma foto, publique em um canal e teste a reprodução.
+5. Reinicie o serviço e confirme que login, conteúdo e foto continuam disponíveis. Teste PowerPoint com os arquivos reais para avaliar memória.
+
+O modo PostgreSQL não faz fallback silencioso para SQLite ou upload local se faltar configuração. Falhas de configuração devem ser corrigidas nos logs/Environment. A conexão verifica o certificado TLS. Se houver erro de certificado, obtenha a CA do banco no painel Supabase e configure `DATABASE_CA_CERT` com o PEM (aceita `\n` escapado); não desative a verificação TLS.
+
+O plano gratuito do Render pode suspender o serviço por inatividade e exige espera para reativação. Banco e objetos ficam no Supabase, mas os limites e condições dos dois planos continuam aplicáveis. Para TVs corporativas contínuas, dimensione disponibilidade, memória e tráfego; LibreOffice pode exceder a memória de instâncias pequenas.
+
+## Dados existentes e backups
+
+Esta mudança não importa nem exclui o banco e as mídias do computador. Uma base Supabase vazia começa com uma instalação nova. Não envie um arquivo `.sqlite` para PostgreSQL: transferir os dados existentes exige uma importação própria, preservando IDs e arquivos. Até lá, mantenha a instalação local e seu backup intactos.
+
+A base local e a hospedada não se sincronizam automaticamente. Faça backups do PostgreSQL e dos objetos do Storage separadamente e teste a restauração. Histórico de publicações não substitui backup.
+
+## Testes executáveis
+
+`npm test` inclui regressão da API e do navegador no modo local, consultas/transações com PostgreSQL embarcado PGlite e testes do contrato de Storage (upload, Range, HEAD e remoção). PGlite e mocks não validam a rede ou as credenciais do projeto Supabase real: a validação final ocorre após configurar o serviço e fazer o deploy.
+
+Referências: [conexão Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres), [chaves](https://supabase.com/docs/guides/api/api-keys), [buckets](https://supabase.com/docs/guides/storage/buckets/fundamentals), [limites de upload](https://supabase.com/docs/guides/storage/uploads/file-limits), [Render Free](https://render.com/docs/free).

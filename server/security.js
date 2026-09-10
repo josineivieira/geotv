@@ -35,12 +35,12 @@ export function authorize(user, permission) {
   if (!permissions[user.role]?.includes(permission))
     fail(403, "Seu perfil não permite esta ação.");
 }
-export function sessionUser(req) {
+export async function sessionUser(req) {
   const token = req.headers.cookie?.match(
     /(?:^|; )geotv_session=([a-f0-9]+)/,
   )?.[1];
   if (!token) return null;
-  return db
+  return await db
     .prepare(
       "SELECT u.id,u.name,u.email,u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=? AND s.expires>?",
     )
@@ -60,8 +60,9 @@ export function rateLimit(req, key, max = 150) {
     for (const [k, v] of limits) if (v.until < Date.now()) limits.delete(k);
   if (value.count > max) fail(429, "Muitas tentativas. Aguarde um minuto.");
 }
-export function bootstrapAdmin() {
-  if (db.prepare("SELECT count(*) AS n FROM users").get().n) return;
+export async function bootstrapAdmin() {
+  if (Number((await db.prepare("SELECT count(*) AS n FROM users").get()).n))
+    return;
   const password = process.env.GEOTV_ADMIN_PASSWORD;
   if (!password || password.length < 12) {
     console.log(
@@ -69,11 +70,13 @@ export function bootstrapAdmin() {
     );
     return;
   }
-  db.prepare("INSERT INTO users VALUES(?,?,?,?,?)").run(
-    randomUUID(),
-    process.env.GEOTV_ADMIN_NAME || "Administrador",
-    (process.env.GEOTV_ADMIN_EMAIL || "admin@geotv.local").toLowerCase(),
-    hashPassword(password),
-    "Administrador",
-  );
+  await db
+    .prepare("INSERT INTO users VALUES(?,?,?,?,?)")
+    .run(
+      randomUUID(),
+      process.env.GEOTV_ADMIN_NAME || "Administrador",
+      (process.env.GEOTV_ADMIN_EMAIL || "admin@geotv.local").toLowerCase(),
+      hashPassword(password),
+      "Administrador",
+    );
 }

@@ -7,7 +7,7 @@ O Admin cria conteúdo estruturado. O backend valida, persiste e autoriza. Uma p
 ```mermaid
 flowchart LR
   A[Admin autenticado] --> B[API e autorização]
-  B --> C[(SQLite / rascunhos)]
+  B --> C[(SQLite local ou PostgreSQL / rascunhos)]
   B --> D[Publicação transacional]
   D --> E[(Fotografia imutável)]
   D --> F[SSE: versão disponível]
@@ -23,7 +23,7 @@ flowchart LR
 
 Node.js 24 executa HTTP, criptografia, streaming e SQLite. O frontend utiliza módulos ES, CSS responsivo e renderização compartilhada. PDF.js é servido localmente para importar PDFs no Admin. PowerPoint é convertido em PDF pelo LibreOffice no servidor, com perfil temporário. Prettier e pdf-lib são dependências exclusivamente de desenvolvimento/teste.
 
-SQLite em WAL atende a uma instalação de servidor único. Banco e mídia ficam em volume persistente. Para expansão, migrar os repositórios e transações para PostgreSQL, mídia para object storage e notificações para um barramento compartilhado. O acesso SQL está no backend, embora a migração ainda exija implementar os novos repositórios; não é uma troca automática de configuração.
+Sem `DATABASE_URL`, SQLite em WAL e arquivos locais atendem a instalação local. Com `DATABASE_URL`, as consultas assíncronas usam PostgreSQL no schema privado `geotv`; cada transação mantém a mesma conexão do pool e as tabelas são criadas na primeira inicialização. A mídia fica em bucket privado do Supabase Storage e é transmitida pelo servidor mantendo `/media/...`, inclusive Range e HEAD para vídeos. O login continua sendo o do GeoTV, sem migração para Supabase Auth. Os dados locais não são transferidos automaticamente. SSE e limites de requisição ainda são locais ao processo: escalar a frota exige rever notificações e limites por dispositivo.
 
 Referências técnicas: [SQLite no Node.js 24](https://nodejs.org/download/release/latest-v24.x/docs/api/sqlite.html), [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource), [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache).
 

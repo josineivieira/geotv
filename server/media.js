@@ -1,8 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { writeFile, unlink } from "node:fs/promises";
-import { unlinkSync } from "node:fs";
-import { resolve } from "node:path";
-import { db, storage, now, audit, allContents } from "./db.js";
+import { db, now, audit, allContents, transaction } from "./db.js";
+import { mediaStorage } from "./storage.js";
 import { mediaUrls } from "../web/shared/presentation.js";
 import { deviceSnapshot } from "./publications.js";
 import { fail } from "./security.js";
@@ -14,10 +12,10 @@ const formats = {
   mp4: "video/mp4",
   webm: "video/webm",
 };
-export function deleteMedia(id, user) {
-  const media = db.prepare("SELECT * FROM media WHERE id=?").get(id);
+export async function deleteMedia(id, user) {
+  const media = await db.prepare("SELECT * FROM media WHERE id=?").get(id);
   if (!media) fail(404, "Arquivo não encontrado.");
-  const used = allContents().filter((content) =>
+  const used = (await allContents()).filter((content) =>
     mediaUrls(content).includes(media.url),
   );
   if (used.length)
@@ -30,11 +28,11 @@ export function deleteMedia(id, user) {
           .join(", ") +
         ". Remova ou substitua a mídia nesses conteúdos primeiro.",
     );
-  for (const device of db
+  for (const device of await db
     .prepare("SELECT id,name,publication_id FROM devices")
     .all())
     if (
-      deviceSnapshot(device).contents.some((c) =>
+      (await deviceSnapshot(device)).contents.some((c) =>
         mediaUrls(c).includes(media.url),
       )
     )
@@ -42,27 +40,20 @@ export function deleteMedia(id, user) {
         409,
         `Arquivo em exibição no canal ${device.name}. Publique a programação atualizada antes de excluir.`,
       );
-  const historical = db
-    .prepare("SELECT data FROM publications")
-    .all()
-    .some((row) =>
-      JSON.parse(row.data).contents.some((c) =>
-        mediaUrls(c).includes(media.url),
-      ),
-    );
+  const historical = (
+    await db.prepare("SELECT data FROM publications").all()
+  ).some((row) =>
+    JSON.parse(row.data).contents.some((c) => mediaUrls(c).includes(media.url)),
+  );
   if (!historical) {
     const file = media.url.match(
       /^\/media\/([a-f0-9-]+\.(?:png|jpg|jpeg|webp|mp4|webm))$/,
     )?.[1];
     if (!file) fail(400, "Caminho de mídia inválido.");
-    try {
-      unlinkSync(resolve(storage, "media", file));
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-    }
+    await mediaStorage.remove(file);
   }
-  db.prepare("DELETE FROM media WHERE id=?").run(id);
-  audit(
+  await db.prepare("DELETE FROM media WHERE id=?").run(id);
+  await audit(
     user,
     "Excluiu mídia",
     id,
@@ -97,27 +88,39 @@ export async function upload(req, user, readBody) {
             : data.subarray(0, 4).equals(Buffer.from([26, 69, 223, 163]));
   if (!valid) fail(400, "O arquivo não corresponde ao formato informado.");
   const hash = createHash("sha256").update(data).digest("hex");
-  const existing = db.prepare("SELECT * FROM media WHERE hash=?").get(hash);
+  const existing = await db
+    .prepare("SELECT * FROM media WHERE hash=?")
+    .get(hash);
   if (existing) return existing;
   const id = randomUUID(),
     url = `/media/${id}.${ext}`,
-    path = resolve(storage, "media", `${id}.${ext}`);
-  await writeFile(path, data, { flag: "wx" });
+    file = `${id}.${ext}`;
+  await mediaStorage.put(file, data, mime);
   try {
-    db.prepare("INSERT INTO media VALUES(?,?,?,?,?,?,?,?)").run(
-      id,
-      name,
-      mime,
-      data.length,
-      url,
-      String(req.headers["x-category"] || "Geral").slice(0, 80),
-      hash,
-      now(),
-    );
-    audit(user, "Enviou mídia", id, null, { name });
+    await transaction(async () => {
+      await db
+        .prepare("INSERT INTO media VALUES(?,?,?,?,?,?,?,?)")
+        .run(
+          id,
+          name,
+          mime,
+          data.length,
+          url,
+          String(req.headers["x-category"] || "Geral").slice(0, 80),
+          hash,
+          now(),
+        );
+      await audit(user, "Enviou mídia", id, null, { name });
+    });
   } catch (e) {
-    await unlink(path);
+    await mediaStorage.remove(file).catch(() => {});
+    if (e.code === "23505" || e.code === "ERR_SQLITE_ERROR") {
+      const duplicate = await db
+        .prepare("SELECT * FROM media WHERE hash=?")
+        .get(hash);
+      if (duplicate) return duplicate;
+    }
     throw e;
   }
-  return db.prepare("SELECT * FROM media WHERE id=?").get(id);
+  return await db.prepare("SELECT * FROM media WHERE id=?").get(id);
 }

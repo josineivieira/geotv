@@ -3,9 +3,11 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { api, json } from "./api.js";
-import { storage } from "./db.js";
+import { storage, transaction, db } from "./db.js";
 import { bootstrapAdmin } from "./security.js";
-bootstrapAdmin();
+import { mediaStorage } from "./storage.js";
+await mediaStorage.initialize();
+await transaction(bootstrapAdmin);
 const web = resolve("web");
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -34,10 +36,20 @@ const server = createServer(async (req, res) => {
   );
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
+    if (url.pathname === "/health" && req.method === "GET") {
+      try {
+        await db.prepare("SELECT 1 AS ok").get();
+        return json(res, 200, { ok: true });
+      } catch {
+        return json(res, 503, { ok: false });
+      }
+    }
     if (url.pathname.startsWith("/api/")) return await api(req, res, url);
     if (!["GET", "HEAD"].includes(req.method))
       return json(res, 405, { error: "Método não permitido." });
     let route = decodeURIComponent(url.pathname);
+    if (route.startsWith("/media/") && mediaStorage.remote)
+      return await mediaStorage.serve(req, res, route.slice(7));
     let root = web;
     if (route.startsWith("/vendor/pdfjs/")) {
       const relative = route.slice("/vendor/pdfjs/".length);
