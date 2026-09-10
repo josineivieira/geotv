@@ -425,6 +425,32 @@ test(
     await shot("channels");
     await evaluate(`document.querySelector('.channel-card').click()`);
     await waitFor('!!document.querySelector("#screen .tv-slide")');
+    await evaluate(`(async () => {
+      const { createFramePresenter } = await import('/player/frame-presenter.js');
+      const host = document.createElement('div');
+      host.innerHTML = '<div id="previous-photo">Foto atual</div>';
+      document.body.append(host);
+      const original = HTMLImageElement.prototype.decode;
+      let release;
+      HTMLImageElement.prototype.decode = () => new Promise(resolve => { release = resolve; });
+      const presenter = createFramePresenter(host);
+      window.frameProbe = { host, presenter, original, release: () => release(), shown: false };
+      presenter.show({id:'slow',template:'image',title:'Próxima foto',fields:{media:'/media/abc.png'}}, 'fade', () => { window.frameProbe.shown = true; });
+    })()`);
+    await delay(900);
+    assert.equal(
+      await evaluate(
+        "!!frameProbe.host.querySelector('#previous-photo') && !frameProbe.shown && !frameProbe.host.querySelector('.frame')",
+      ),
+      true,
+    );
+    await evaluate("frameProbe.release()");
+    await waitFor(
+      "frameProbe.shown && !!frameProbe.host.querySelector('.frame')",
+    );
+    await evaluate(
+      "HTMLImageElement.prototype.decode = frameProbe.original; frameProbe.presenter.cancel(); frameProbe.host.remove(); delete window.frameProbe;",
+    );
     assert.equal(await evaluate(`!!document.querySelector('nav')`), false);
     await command("Runtime.evaluate", {
       expression: "document.querySelector('.fullscreen-button').click()",

@@ -1,8 +1,9 @@
-const SHELL = "geotv-shell-v6";
+const SHELL = "geotv-shell-v7";
 const files = [
   "/player/index.html",
   "/player/player.js",
   "/player/fullscreen.js",
+  "/player/frame-presenter.js",
   "/player/player.css",
   "/player/cache.js",
   "/shared/templates.js",

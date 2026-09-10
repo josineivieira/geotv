@@ -1,15 +1,15 @@
-import { renderSlide } from "/shared/templates.js";
+import { createFramePresenter } from "./frame-presenter.js";
 import { presentationFrames } from "/shared/presentation.js";
 import { eligible } from "/shared/schedule.js";
 const id = location.pathname.split("/")[2],
   screen = document.querySelector("#screen");
+const presenter = createFramePresenter(screen);
 let channel = null,
   index = -1,
   deadline = 0,
   currentId = null,
   currentVersion = null,
-  busy = false,
-  transition;
+  busy = false;
 function tick() {
   if (!channel) return;
   let frames = channel.contents
@@ -30,6 +30,7 @@ function tick() {
       },
     ];
   if (!frames.length) {
+    presenter.cancel();
     if (currentId !== null || !screen.querySelector(".opening p"))
       screen.innerHTML =
         '<div class="opening"><strong>geo<span>tv</span></strong><p>Em breve, novas conexões por aqui.</p></div>';
@@ -42,23 +43,16 @@ function tick() {
     currentVersion === channel.version
   )
     return;
-  index = (index + 1) % frames.length;
-  const c = frames[index];
-  currentId = c.id;
-  currentVersion = channel.version;
-  deadline = Date.now() + c.duration * 1000;
-  const frame = document.createElement("div");
-  frame.className =
-    "frame " + (c.transition || channel.settings.transition || "fade");
-  frame.innerHTML = renderSlide(c);
-  const old = screen.lastElementChild;
-  for (const node of [...screen.children]) if (node !== old) node.remove();
-  screen.append(frame);
-  clearTimeout(transition);
-  transition = setTimeout(() => {
-    old?.querySelectorAll("video").forEach((v) => v.pause());
-    old?.remove();
-  }, 700);
+  const nextIndex = (index + 1) % frames.length;
+  const c = frames[nextIndex],
+    version = channel.version;
+  presenter.show(c, c.transition || channel.settings.transition, () => {
+    index = nextIndex;
+    currentId = c.id;
+    currentVersion = version;
+    deadline = Date.now() + c.duration * 1000;
+    presenter.preload(frames[(index + 1) % frames.length]);
+  });
 }
 async function sync() {
   if (busy) return;
@@ -69,12 +63,15 @@ async function sync() {
     });
     if ([401, 403, 404].includes(res.status)) {
       channel = null;
+      presenter.cancel();
       screen.replaceChildren();
       location.replace("/");
       return;
     }
     if (!res.ok) throw new Error();
-    channel = await res.json();
+    const next = await res.json();
+    if (JSON.stringify(next) !== JSON.stringify(channel)) presenter.cancel();
+    channel = next;
     tick();
   } catch {
     if (!channel)
@@ -91,7 +88,7 @@ window.addEventListener(
   () => {
     clearInterval(timer);
     clearInterval(refresh);
-    clearTimeout(transition);
+    presenter.cancel();
   },
   { once: true },
 );

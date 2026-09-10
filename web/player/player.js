@@ -1,4 +1,4 @@
-import { renderSlide } from "/shared/templates.js";
+import { createFramePresenter } from "./frame-presenter.js";
 import { eligible } from "/shared/schedule.js";
 import { presentationFrames } from "/shared/presentation.js";
 import { readSnapshot, writeSnapshot, cacheMedia } from "./cache.js";
@@ -10,6 +10,7 @@ if (token) {
   history.replaceState(null, "", location.pathname);
 }
 const screen = document.querySelector("#screen");
+const presenter = createFramePresenter(screen);
 let snapshot = null,
   index = -1,
   current = null,
@@ -17,44 +18,34 @@ let snapshot = null,
   events,
   syncing = false,
   syncedAt = null,
-  lastBeat = 0,
-  transitionTimer;
+  lastBeat = 0;
 async function revoke() {
   token = null;
   snapshot = null;
   events?.close();
   localStorage.removeItem(key);
-  clearTimeout(transitionTimer);
+  presenter.cancel();
   screen.querySelectorAll("video").forEach((video) => video.pause());
   opening("Esta TV foi desconectada. Solicite uma nova ativação.");
   await writeSnapshot(id, null).catch(() => {});
 }
 function opening(message) {
+  presenter.cancel();
   screen.innerHTML = `<div class="opening"><strong>geo<span>tv</span><i></i></strong>${message ? "<p>" + message + "</p>" : '<div class="opening-pulse"></div>'}</div>`;
   current = null;
 }
-function show(content) {
+function show(content, onShown = () => {}) {
   if (current?.id === content.id && current?._version === content._version)
     return;
-  const frame = document.createElement("div");
-  frame.className =
-    "frame " + (content.transition || snapshot?.settings?.transition || "fade");
-  frame.innerHTML = renderSlide(content);
-  const old = screen.lastElementChild;
-  screen.append(frame);
-  clearTimeout(transitionTimer);
-  for (const child of [...screen.children])
-    if (child !== frame && child !== old) child.remove();
-  transitionTimer = setTimeout(() => {
-    old?.querySelectorAll("video").forEach((v) => {
-      v.pause();
-      v.removeAttribute("src");
-      v.load();
-    });
-    old?.remove();
-  }, 700);
-  current = content;
-  deadline = Date.now() + content.duration * 1000;
+  presenter.show(
+    content,
+    content.transition || snapshot?.settings?.transition,
+    () => {
+      current = content;
+      deadline = Date.now() + content.duration * 1000;
+      onShown();
+    },
+  );
 }
 function tick() {
   if (!snapshot) return;
@@ -88,13 +79,11 @@ function tick() {
     current._version !== snapshot.version ||
     Date.now() >= deadline
   ) {
-    index = (index + 1) % list.length;
-    show({ ...list[index], _version: snapshot.version });
-    const next = list[(index + 1) % list.length];
-    if (next.fields?.media && next.template !== "video") {
-      const img = new Image();
-      img.src = next.fields.media;
-    }
+    const nextIndex = (index + 1) % list.length;
+    show({ ...list[nextIndex], _version: snapshot.version }, () => {
+      index = nextIndex;
+      presenter.preload(list[(index + 1) % list.length]);
+    });
   }
 }
 async function sync() {
@@ -120,6 +109,7 @@ async function sync() {
       JSON.stringify(next.alerts) !== JSON.stringify(snapshot.alerts)
     ) {
       snapshot = { ...snapshot, alerts: next.alerts };
+      presenter.cancel();
       tick();
       await writeSnapshot(id, snapshot);
     }
@@ -127,6 +117,7 @@ async function sync() {
     if (!token) return;
     await writeSnapshot(id, next);
     snapshot = next;
+    presenter.cancel();
     syncedAt = new Date().toISOString();
     tick();
   } catch {
@@ -190,7 +181,7 @@ window.addEventListener(
     clearInterval(tickTimer);
     clearInterval(beatTimer);
     clearInterval(syncTimer);
-    clearTimeout(transitionTimer);
+    presenter.cancel();
     window.removeEventListener("online", sync);
   },
   { once: true },
