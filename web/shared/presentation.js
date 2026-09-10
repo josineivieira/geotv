@@ -1,5 +1,7 @@
+import { storyFrames } from "./client-story.js";
 export const transitions = ["fade", "slide", "zoom", "none"];
 export function presentationFrames(content) {
+  if (content.template === "client-story") return storyFrames(content);
   if (content.template !== "presentation" || !content.slides?.length)
     return [content];
   return content.slides.map((slide, index) => ({

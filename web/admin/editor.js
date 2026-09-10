@@ -1,6 +1,7 @@
 import { request, toast } from "./api.js";
 import { uploadFile } from "./uploads.js";
 import { mountPresentationEditor } from "./presentation-editor.js";
+import { storyDefaults, storyFrames } from "/shared/client-story.js";
 import {
   templateById,
   renderSlide,
@@ -10,6 +11,10 @@ export function openEditor(original, state, onSaved) {
   const content = structuredClone(original),
     template = templateById(content.template),
     dialog = document.querySelector("#modal");
+  if (content.template === "client-story") {
+    content.fields = { ...storyDefaults, ...content.fields };
+    if (!content.id) content.duration = 130;
+  }
   dialog.classList.add("editor-dialog");
   const input = (key, label, type = "text", value = "", extra = "") =>
     `<label>${e(label)}${type === "textarea" ? `<textarea name="${key}" ${extra}>${e(value)}</textarea>` : type === "checkbox" ? `<input type="checkbox" name="${key}" ${value ? "checked" : ""}>` : `<input type="${type}" name="${key}" value="${e(value)}" ${extra}>`}</label>`;
@@ -47,6 +52,43 @@ export function openEditor(original, state, onSaved) {
     { once: true },
   );
   const form = document.querySelector("#editor-form");
+  if (content.template === "client-story") {
+    const duration = form.elements.duration;
+    duration.min = "65";
+    duration.parentElement.firstChild.textContent =
+      "Duração total das 13 telas (segundos)";
+    form.querySelector("[name=field_media]").parentElement.hidden = true;
+    const play = document.createElement("button");
+    play.type = "button";
+    play.textContent = "▶ Assistir às 13 telas";
+    dialog.querySelector(".editor-preview").append(play);
+    let timer,
+      scene = 0;
+    const stop = () => {
+      clearInterval(timer);
+      timer = null;
+      play.textContent = "▶ Assistir às 13 telas";
+    };
+    play.onclick = () => {
+      if (timer) {
+        stop();
+        return;
+      }
+      read();
+      scene = 0;
+      const frames = storyFrames(content);
+      const draw = () => {
+        dialog.querySelector("#live-preview").innerHTML = renderSlide(
+          frames[scene++ % frames.length],
+        );
+      };
+      draw();
+      timer = setInterval(draw, Math.max(5, content.duration / 13) * 1000);
+      play.textContent = "■ Parar apresentação";
+    };
+    form.addEventListener("input", stop);
+    dialog.addEventListener("close", stop, { once: true });
+  }
   let presentation;
   const mediaSelect = form.querySelector("[name=field_media]");
   mediaSelect.parentElement.insertAdjacentHTML(

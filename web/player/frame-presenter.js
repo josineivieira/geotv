@@ -57,6 +57,38 @@ export function createFramePresenter(screen) {
           if (child !== old) child.remove();
         frame.classList.add(effect || "fade");
         screen.append(frame);
+        const counter = frame.querySelector("[data-story-value]");
+        if (
+          counter &&
+          !matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
+          const label = counter.dataset.storyValue;
+          const numeric = label.replace("%", "").trim();
+          const value = Number(numeric.replace(",", "."));
+          if (
+            /^\d+(?:[.,]\d+)?%?$/.test(label.trim()) &&
+            Number.isFinite(value)
+          ) {
+            const start = performance.now(),
+              digits = numeric.split(/[.,]/)[1]?.length || 0;
+            const animate = (time) => {
+              if (!frame.isConnected) return;
+              const progress = Math.min(1, (time - start) / 1400);
+              counter.textContent =
+                progress === 1
+                  ? label
+                  : (value * (1 - Math.pow(1 - progress, 3))).toLocaleString(
+                      "pt-BR",
+                      {
+                        minimumFractionDigits: digits,
+                        maximumFractionDigits: digits,
+                      },
+                    ) + (label.includes("%") ? "%" : "");
+              if (progress < 1) requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+          }
+        }
         pending = null;
         onShown();
         removal = setTimeout(() => {

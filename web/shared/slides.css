@@ -390,3 +390,107 @@
 .layout-compact .notice-message {
   font-size: 2.7cqw;
 }
+
+.story-slide {
+  background: radial-gradient(ellipse at top right, #514375, #171529 65%);
+  color: #fff;
+  padding: 3cqw 5cqw;
+  display: flex;
+  flex-direction: column;
+}
+.story-slide header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.4cqw;
+  color: #c8c0dc;
+}
+.story-slide header > span:first-child {
+  font-size: 3cqw;
+  font-weight: 800;
+  color: #fff;
+}
+.story-slide header b {
+  color: #9ddcc0;
+  font-weight: 300;
+}
+.story-section {
+  margin-top: 2cqw;
+  color: #9ddcc0;
+  letter-spacing: 0.25cqw;
+  text-transform: uppercase;
+  font-size: 1cqw;
+}
+.story-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.story-stage h1 {
+  font-size: 4cqw;
+  margin: 1cqw 0;
+  animation: story-enter 0.6s both;
+}
+.story-symbol {
+  font-size: 4cqw;
+  color: #9ddcc0;
+  animation: story-enter 0.6s both;
+}
+.story-value {
+  font-size: 12cqw;
+  line-height: 1.15;
+  color: #9ddcc0;
+  animation: story-enter 0.7s 0.25s both;
+}
+.story-caption {
+  max-width: 75cqw;
+  font-size: 2.2cqw;
+  line-height: 1.5;
+  margin: 1.5cqw 0;
+  animation: story-enter 0.7s 1.5s both;
+}
+.story-slide footer {
+  border-top: 1px solid #ffffff25;
+  padding-top: 1cqw;
+  font-size: 0.9cqw;
+  letter-spacing: 0.2cqw;
+  color: #b8afcc;
+}
+.story-stage table {
+  width: 90%;
+  border-collapse: collapse;
+  margin-top: 2cqw;
+  text-align: left;
+  font-size: 1.7cqw;
+}
+.story-stage th {
+  color: #9ddcc0;
+  font-size: 1.2cqw;
+  text-transform: uppercase;
+}
+.story-stage td,
+.story-stage th {
+  padding: 1.1cqw;
+  border-bottom: 1px solid #ffffff20;
+}
+.story-stage tr {
+  animation: story-enter 0.6s calc(var(--row, 0) * 0.35s) both;
+}
+@keyframes story-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1.5cqw);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-slide * {
+    animation: none !important;
+  }
+}
