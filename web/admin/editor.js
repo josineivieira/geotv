@@ -6,6 +6,7 @@ import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
 import { salesDefaults, salesFrames } from "/shared/sales-show.js";
 import { alertDefaults, alertFrames } from "/shared/process-alerts.js";
 import { goalDefaults } from "/shared/goals.js";
+import { monthlyResultDefaults } from "/shared/monthly-results.js";
 import {
   templateById,
   renderSlide,
@@ -43,6 +44,9 @@ export function openEditor(original, state, onSaved) {
     if (!content.id) content.duration = sceneCount * 10;
   }
   dialog.classList.add("editor-dialog");
+  if (content.template === "monthly-results") {
+    content.fields = { ...monthlyResultDefaults, ...content.fields };
+  }
   if (content.template === "goals") {
     content.fields = { ...goalDefaults, ...content.fields };
   }
