@@ -21,6 +21,14 @@ let snapshot = null,
   lastBeat = 0;
 let caching = false,
   pendingCache = null;
+let workerRegistration = null,
+  lastWorkerCheck = 0;
+function updatePlayer() {
+  if (!workerRegistration || Date.now() - lastWorkerCheck < 60000) return;
+  lastWorkerCheck = Date.now();
+  // Check for new template code even when the TV stays open for days.
+  void workerRegistration.update().catch(() => {});
+}
 async function persist(next) {
   pendingCache = next;
   if (caching) return;
@@ -107,6 +115,7 @@ function tick() {
 }
 async function sync() {
   if (syncing || !token) return;
+  updatePlayer();
   syncing = true;
   try {
     const response = await fetch(`/api/player/${id}/snapshot`, {
@@ -171,7 +180,9 @@ async function start() {
   } catch {}
   if ("serviceWorker" in navigator)
     try {
-      await navigator.serviceWorker.register("/sw.js");
+      workerRegistration = await navigator.serviceWorker.register("/sw.js", {
+        updateViaCache: "none",
+      });
       await navigator.serviceWorker.ready;
     } catch {}
   await sync();

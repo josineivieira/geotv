@@ -86,6 +86,20 @@ export function openEditor(original, state, onSaved) {
     { once: true },
   );
   const form = document.querySelector("#editor-form");
+  const saveError = document.createElement("p");
+  saveError.className = "editor-save-error";
+  saveError.setAttribute("role", "alert");
+  saveError.hidden = true;
+  form.querySelector(".editor-footer").before(saveError);
+  form.addEventListener(
+    "invalid",
+    (event) => {
+      saveError.textContent = `Confira o campo ${event.target.closest("label")?.firstChild?.textContent?.trim() || "indicado"}: ${event.target.validationMessage}`;
+      saveError.hidden = false;
+      event.target.scrollIntoView({ block: "center" });
+    },
+    true,
+  );
   if (animated) {
     const duration = form.elements.duration;
     duration.min = String(sceneCount * 5);
@@ -206,6 +220,7 @@ export function openEditor(original, state, onSaved) {
     const data = read(),
       button = form.querySelector("button[type=submit],button.primary");
     button.disabled = true;
+    saveError.hidden = true;
     try {
       presentation?.validate();
       const saved = await request(
@@ -225,6 +240,9 @@ export function openEditor(original, state, onSaved) {
       await onSaved();
       toast("Conteúdo salvo. Publique para atualizar as TVs.");
     } catch (error) {
+      saveError.textContent = `Não foi possível concluir o salvamento: ${error.message}`;
+      saveError.hidden = false;
+      saveError.scrollIntoView({ block: "nearest" });
       toast(error.message);
       button.disabled = false;
     }

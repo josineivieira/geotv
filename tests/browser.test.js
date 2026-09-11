@@ -175,6 +175,66 @@ test(
     );
     await waitFor('!!document.querySelector(".stats")');
     await shot("dashboard");
+    await evaluate(
+      `document.querySelector('[data-action=new]').click();document.querySelector('[data-id=goals]').click()`,
+    );
+    await waitFor('!!document.querySelector("[name=field_annualCurrent]")');
+    await command("Emulation.setDeviceMetricsOverride", {
+      width: 1590,
+      height: 850,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    assert.ok(
+      await evaluate(
+        `(()=>{const r=document.querySelector('.editor-footer button.primary').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight})()`,
+      ),
+      "Salvar permanece visível com o editor aberto",
+    );
+    await evaluate(
+      `window.originalSaveFetch=window.fetch;window.fetch=(url,...args)=>String(url)==='/api/contents'?Promise.resolve(new Response(JSON.stringify({error:'Falha simulada de gravação'}),{status:500,headers:{'Content-Type':'application/json'}})):window.originalSaveFetch(url,...args);document.querySelector('#editor-form').requestSubmit()`,
+    );
+    await waitFor(`!document.querySelector('.editor-save-error').hidden`);
+    assert.ok(
+      await evaluate(
+        `document.querySelector('.editor-save-error').textContent.includes('Falha simulada')`,
+      ),
+    );
+    await evaluate(`window.fetch=window.originalSaveFetch`);
+    await command("Emulation.setDeviceMetricsOverride", {
+      width: 1440,
+      height: 1080,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await evaluate(
+      `document.querySelector('[name=title]').value='Metas persistidas';document.querySelector('[name=field_annualCurrent]').value=4321;document.querySelector('#editor-form').requestSubmit()`,
+    );
+    await waitFor('!document.querySelector("#editor-form")');
+    const savedGoal = await evaluate(
+      `fetch('/api/state').then(r=>r.json()).then(s=>s.contents.find(c=>c.title==='Metas persistidas'))`,
+    );
+    assert.equal(savedGoal.fields.annualCurrent, "4321");
+    await evaluate(
+      `document.querySelector('[data-page="Conteúdos"]').click();document.querySelector('[data-action="edit"][data-id="${savedGoal.id}"]').click()`,
+    );
+    await waitFor('!!document.querySelector("[name=field_annualCurrent]")');
+    assert.equal(
+      await evaluate(
+        `document.querySelector('[name=field_annualCurrent]').value`,
+      ),
+      "4321",
+    );
+    await evaluate(
+      `document.querySelector('[name=field_annualCurrent]').value=4567;document.querySelector('#editor-form').requestSubmit()`,
+    );
+    await waitFor('!document.querySelector("#editor-form")');
+    assert.equal(
+      await evaluate(
+        `fetch('/api/state').then(r=>r.json()).then(s=>s.contents.find(c=>c.id==='${savedGoal.id}').fields.annualCurrent)`,
+      ),
+      "4567",
+    );
     await evaluate(`document.querySelector('[data-action=new]').click()`);
     await waitFor('!!document.querySelector("[data-action=template]")');
     await evaluate(`document.querySelector('[data-id=sales]').click()`);

@@ -686,12 +686,25 @@ main {
   font-size: 11px;
 }
 .editor-footer {
+  position: sticky;
+  bottom: -25px;
+  z-index: 2;
+  background: #fff;
+  padding-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 20px;
   padding-top: 22px;
   border-top: 1px solid #e2e8df;
   margin-top: 20px;
+}
+.editor-save-error {
+  color: #a03243;
+  background: #fff2f4;
+  border: 1px solid #e6c7ce;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 12px 0;
 }
 .editor-footer > span {
   font-size: 11px;

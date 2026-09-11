@@ -1,4 +1,4 @@
-const SHELL = "geotv-shell-v20";
+const SHELL = "geotv-shell-v21";
 const files = [
   "/assets/geomaritima-logo.png",
   "/player/index.html",
@@ -29,10 +29,24 @@ self.addEventListener("install", (event) =>
 self.addEventListener("activate", (event) =>
   event.waitUntil(
     (async () => {
-      for (const key of await caches.keys())
+      const keys = await caches.keys();
+      const upgrading = keys.some(
+        (key) => key.startsWith("geotv-shell-") && key !== SHELL,
+      );
+      for (const key of keys)
         if (key.startsWith("geotv-shell-") && key !== SHELL)
           await caches.delete(key);
       await self.clients.claim();
+      // Loaded ES modules and CSS do not change when a new cache activates.
+      // Navigate existing TVs only after the complete new shell is installed.
+      if (upgrading) {
+        const clients = await self.clients.matchAll({ type: "window" });
+        await Promise.allSettled(
+          clients
+            .filter((client) => new URL(client.url).pathname.startsWith("/tv/"))
+            .map((client) => client.navigate(client.url)),
+        );
+      }
     })(),
   ),
 );
