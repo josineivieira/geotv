@@ -1039,7 +1039,7 @@
   background:
     radial-gradient(ellipse at 95% 0%, #65578c, transparent 50%), #282337;
   color: #f4f7f5;
-  padding: 2.4cqw 3.5cqw;
+  padding: 1.8cqw 3cqw;
 }
 .goals-slide::before {
   content: "";
@@ -1061,7 +1061,7 @@
 }
 .goals-header {
   color: #c9bedc;
-  font-size: 0.95cqw;
+  font-size: 1.2cqw;
   letter-spacing: 0.18cqw;
 }
 .goals-logo {
@@ -1071,12 +1071,12 @@
   object-position: left center;
 }
 .goals-title {
-  margin: 1.5cqw 0 1.6cqw;
+  margin: 0.8cqw 0 1cqw;
   animation: story-enter 0.9s both;
 }
 .goals-kicker {
   color: #9ddcc0;
-  font-size: 0.85cqw;
+  font-size: 1.15cqw;
   font-weight: 700;
   letter-spacing: 0.25cqw;
 }
@@ -1088,7 +1088,7 @@
   overflow-wrap: anywhere;
 }
 .goals-unit {
-  font-size: 1.1cqw;
+  font-size: 1.4cqw;
   color: #c9bedc;
 }
 .goals-board {
@@ -1117,13 +1117,13 @@
 }
 .goals-card-top h2 {
   margin: 0;
-  font-size: 1.05cqw;
+  font-size: 1.55cqw;
   text-transform: uppercase;
   letter-spacing: 0.15cqw;
 }
 .goals-card-top > span {
   color: var(--goal-color);
-  font-size: 0.8cqw;
+  font-size: 1.2cqw;
 }
 .goals-numbers {
   justify-content: flex-start;
@@ -1131,18 +1131,18 @@
   font-variant-numeric: tabular-nums;
 }
 .goals-numbers strong {
-  font-size: 3.1cqw;
+  font-size: 3.6cqw;
   line-height: 1.1;
   letter-spacing: -0.08cqw;
 }
 .goals-numbers > span {
   color: #c9bedc;
-  font-size: 1cqw;
+  font-size: 1.5cqw;
 }
 .goals-numbers > b {
   margin-left: auto;
   color: var(--goal-color);
-  font-size: 1.9cqw;
+  font-size: 2.4cqw;
 }
 .goals-track {
   height: 0.35cqw;
@@ -1174,8 +1174,8 @@
 }
 .goals-card p {
   margin: 0.5cqw 0 0;
-  color: #c9bedc;
-  font-size: 0.85cqw;
+  color: #e0d9ed;
+  font-size: 1.3cqw;
 }
 .goals-today {
   position: relative;
@@ -1212,7 +1212,7 @@
 }
 .goals-today-top {
   width: 100%;
-  font-size: 1.1cqw;
+  font-size: 1.6cqw;
   font-weight: 800;
   letter-spacing: 0.12cqw;
 }
@@ -1220,7 +1220,7 @@
   padding: 0.4cqw 0.7cqw;
   border: 1px solid #ffffff20;
   border-radius: 2cqw;
-  font-size: 0.85cqw;
+  font-size: 1.25cqw;
   letter-spacing: 0;
   color: var(--goal-color);
 }
@@ -1258,13 +1258,13 @@
   gap: 0.6cqw;
 }
 .goals-ring span {
-  font-size: 0.85cqw;
+  font-size: 1.3cqw;
   color: #d2c9e1;
   max-width: 13cqw;
   text-align: center;
 }
 .goals-ring strong {
-  font-size: 4.5cqw;
+  font-size: 4.8cqw;
   line-height: 1;
   letter-spacing: -0.2cqw;
   font-variant-numeric: tabular-nums;
@@ -1277,18 +1277,18 @@
   animation: story-enter 0.8s 2s both;
 }
 .goals-today-result strong {
-  font-size: 2.7cqw;
+  font-size: 3.3cqw;
   line-height: 1;
 }
 .goals-today-result span {
-  font-size: 0.85cqw;
-  max-width: 5cqw;
+  font-size: 1.25cqw;
+  max-width: 8cqw;
   line-height: 1.4;
   letter-spacing: 0.1cqw;
 }
 .goals-gap {
   margin: 0.6cqw 0;
-  font-size: 1cqw;
+  font-size: 1.45cqw;
   color: #e0d9ed;
 }
 .goals-cheer {
@@ -1296,12 +1296,12 @@
   border-top: 1px solid #ffffff18;
   width: 100%;
   text-align: center;
-  font-size: 1.1cqw;
+  font-size: 1.35cqw;
   font-weight: 600;
 }
 .goals-footer {
   margin-top: 1.3cqw;
-  color: #beb1d3;
+  color: #e0d9ed;
   font-size: 0.8cqw;
 }
 .goals-footer > span:last-child {
