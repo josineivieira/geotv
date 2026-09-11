@@ -73,11 +73,27 @@ export function renderMonthlyResults(content, e) {
   const d = monthlyResultData(content.fields);
   const display = (n) => (n === null ? "—" : fmt(n));
   const ceiling = Math.max(1, ...d.prior, ...d.current);
-  const y = (value) => 310 - (value / ceiling) * 235;
+  const y = (value) => 370 - (value / ceiling) * 275;
   const bars = resultMonths
     .map((month, i) => {
-      const x = 64 + i * 103;
-      return `<g class="results-month" style="--order:${i}">${[d.prior[i], d.current[i]].map((value, j) => `<g class="results-series-${j}">${value === null ? "" : `<rect class="results-bar" x="${x + j * 37}" y="${y(value)}" width="29" height="${310 - y(value)}" rx="4"/>`}<text x="${x + j * 37 + 14.5}" y="${value === null ? 292 : y(value) - 12}" text-anchor="middle">${display(value)}</text></g>`).join("")}<text class="results-month-label" x="${x + 33}" y="345" text-anchor="middle">${month.toUpperCase()}</text></g>`;
+      const x = 20 + i * 110;
+      const best = i === d.best;
+      return `<g class="results-month ${best ? "is-best" : ""}" style="--order:${i}"><rect class="results-lane" x="${x - 10}" y="34" width="102" height="384" rx="14"/>${best ? `<text class="results-peak-label" x="${x + 41}" y="60" text-anchor="middle">DESTAQUE</text>` : ""}${[
+        d.prior[i],
+        d.current[i],
+      ]
+        .map((value, j) => {
+          const close =
+            d.prior[i] !== null &&
+            d.current[i] !== null &&
+            Math.abs(y(d.prior[i]) - y(d.current[i])) < 25;
+          const labelY =
+            value === null ? 350 : y(value) - 14 - (close && j === 0 ? 23 : 0);
+          return `<g class="results-series-${j}">${value === null ? "" : `<rect class="results-bar" x="${x + j * 47}" y="${y(value)}" width="34" height="${370 - y(value)}" rx="6"/>`}<text x="${x + j * 47 + 17}" y="${labelY}" text-anchor="middle">${display(value)}</text></g>`;
+        })
+        .join(
+          "",
+        )}<text class="results-month-label" x="${x + 41}" y="405" text-anchor="middle">${month.toUpperCase()}</text></g>`;
     })
     .join("");
   const cumulative = (values) => {
@@ -98,5 +114,5 @@ export function renderMonthlyResults(content, e) {
       .join(" ")}"/>`;
   const change =
     d.change === null ? "—" : `${d.change > 0 ? "+" : ""}${fmt(d.change)}%`;
-  return `<article class="tv-slide monthly-results"><header class="results-header"><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>RESULTADOS · JANEIRO A SETEMBRO</span></header><div class="results-heading"><div><span class="results-kicker">O MOVIMENTO VIRA RESULTADO</span><h1>${e(content.title || "Nossa evolução, mês a mês")}</h1></div><div class="results-period">JAN <span>→</span> SET</div></div><section class="results-layout"><div class="results-chart-panel"><div class="results-chart-heading"><h2>Volume mensal</h2><div class="results-legend"><span><i></i>${e(d.f.priorYear)}</span><span><i></i>${e(d.f.currentYear)}</span></div></div><svg class="results-chart" viewBox="0 0 1000 370" role="img" aria-label="Volume mensal de janeiro a setembro. Barras claras: ${e(d.f.priorYear)}. Barras roxas: ${e(d.f.currentYear)}.">${[0, 0.5, 1].map((part) => `<line class="results-gridline" x1="48" x2="982" y1="${y(ceiling * part)}" y2="${y(ceiling * part)}"/>`).join("")}${bars}</svg><div class="results-chart-note"><span>Comparativo ${e(d.f.currentYear)} × ${e(d.f.priorYear)}</span><span>${e(d.f.reference)}</span></div></div><aside class="results-summary"><div class="results-total"><span>ACUMULADO · JAN–SET</span><strong>${display(d.currentTotal)}</strong><div class="results-change ${d.change !== null && d.change < 0 ? "is-down" : ""}">${change} <small>vs. ${e(d.f.priorYear)}</small></div><p>${e(d.f.priorYear)}: <b>${display(d.priorTotal)}</b></p></div><div class="results-cumulative"><h2>Ritmo acumulado</h2><svg viewBox="0 0 264 150" role="img" aria-label="Evolução acumulada de janeiro a setembro">${curve(priorCurve, 0)}${curve(currentCurve, 1)}<text x="16" y="148">JAN</text><text x="221" y="148">SET</text></svg></div><div class="results-best"><span>DESTAQUE DE ${e(d.f.currentYear)}</span><strong>${d.best < 0 ? "—" : resultMonths[d.best]} <b>${d.best < 0 ? "—" : display(d.current[d.best])}</b></strong><span>Maior volume do período</span></div></aside></section><footer class="results-footer"><span>GeoTV · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "RESULTADOS GEOMARÍTIMA"}</span><span>JUNTOS, MOVIMENTAMOS RESULTADOS.</span></footer></article>`;
+  return `<article class="tv-slide monthly-results"><header class="results-header"><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>RESULTADOS · JANEIRO A SETEMBRO</span></header><div class="results-heading"><div><span class="results-kicker">O MOVIMENTO VIRA RESULTADO</span><h1>${e(content.title || "Nossa evolução, mês a mês")}</h1></div><div class="results-period">JAN <span>→</span> SET</div></div><section class="results-layout"><div class="results-chart-panel"><div class="results-chart-heading"><h2>Volume mensal</h2><div class="results-legend"><span><i></i>${e(d.f.priorYear)}</span><span><i></i>${e(d.f.currentYear)}</span></div></div><svg class="results-chart" viewBox="0 0 1000 440" role="img" aria-label="Volume mensal de janeiro a setembro. Barras roxas: ${e(d.f.priorYear)}. Barras verdes: ${e(d.f.currentYear)}.">${[0, 0.5, 1].map((part) => `<line class="results-gridline" x1="10" x2="998" y1="${y(ceiling * part)}" y2="${y(ceiling * part)}"/>`).join("")}${bars}</svg><div class="results-chart-note"><span>Comparativo ${e(d.f.currentYear)} × ${e(d.f.priorYear)}</span><span>${e(d.f.reference)}</span></div></div><aside class="results-summary"><div class="results-total"><span>ACUMULADO · JAN–SET</span><strong>${display(d.currentTotal)}</strong><div class="results-change ${d.change !== null && d.change < 0 ? "is-down" : ""}">${change} <small>vs. ${e(d.f.priorYear)}</small></div><p>${e(d.f.priorYear)}: <b>${display(d.priorTotal)}</b></p></div><div class="results-cumulative"><h2>Ritmo acumulado</h2><svg viewBox="0 0 264 150" role="img" aria-label="Evolução acumulada de janeiro a setembro">${curve(priorCurve, 0)}${curve(currentCurve, 1)}<text x="16" y="148">JAN</text><text x="221" y="148">SET</text></svg></div><div class="results-best"><span>DESTAQUE DE ${e(d.f.currentYear)}</span><strong>${d.best < 0 ? "—" : resultMonths[d.best]} <b>${d.best < 0 ? "—" : display(d.current[d.best])}</b></strong><span>Maior volume do período</span></div></aside></section><footer class="results-footer"><span>GeoTV · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "RESULTADOS GEOMARÍTIMA"}</span><span>JUNTOS, MOVIMENTAMOS RESULTADOS.</span></footer></article>`;
 }

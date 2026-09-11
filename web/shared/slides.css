@@ -1374,6 +1374,7 @@
 }
 
 .monthly-results {
+  line-height: 1.2;
   padding: 2cqw 3cqw;
   background:
     radial-gradient(ellipse at top right, #65578c, transparent 60%), #282337;
@@ -1403,7 +1404,7 @@
   letter-spacing: 0.13cqw;
 }
 .results-heading {
-  margin: 1.4cqw 0 1.8cqw;
+  margin: 1cqw 0 1.2cqw;
   animation: story-enter 0.8s both;
 }
 .results-kicker {
@@ -1438,13 +1439,18 @@
   min-height: 0;
 }
 .results-chart-panel {
-  background: #f8f7fc;
-  color: #302943;
+  background: linear-gradient(145deg, #51468165, #211d30e6);
+  color: #fff;
+  border: 1px solid #bcb0eb35;
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    0 1cqw 3cqw #17132130;
   border-radius: 1.2cqw;
   padding: 1.6cqw 1.1cqw;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 0;
 }
 .results-chart-heading {
   padding: 0 0.5cqw;
@@ -1466,42 +1472,65 @@
   width: 1cqw;
   height: 1cqw;
   border-radius: 0.25cqw;
-  background: #9ddcc0;
-  border: 1px solid #58987e;
+  background: #a799d5;
+  border: 1px solid #c7bcec;
 }
 .results-legend span:last-child i {
-  background: #8176b5;
-  border-color: #65578c;
+  background: #9ddcc0;
+  border-color: #c5f5df;
 }
 .results-chart {
   width: 100%;
-  overflow: visible;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 .results-gridline {
-  stroke: #30294320;
+  stroke: #ffffff16;
   stroke-dasharray: 3 6;
 }
 .results-chart text {
   font-family: inherit;
-  fill: #302943;
-  font-size: 20px;
+  fill: #f4efff;
+  font-size: 23px;
   font-weight: 750;
 }
 .results-chart .results-month-label {
   font-size: 21px;
 }
 .results-series-0 {
+  fill: #a799d5;
+  stroke: #a799d5;
+}
+.results-series-1 {
   fill: #9ddcc0;
   stroke: #9ddcc0;
 }
-.results-series-1 {
-  fill: #8176b5;
-  stroke: #8176b5;
+.results-lane {
+  fill: #ffffff03;
+  stroke: #ffffff06;
+}
+.results-month.is-best .results-lane {
+  fill: #9ddcc010;
+  stroke: #9ddcc050;
+}
+.results-chart .results-peak-label {
+  fill: #9ddcc0;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+.results-chart .results-series-1 text {
+  fill: #bdf3d9;
+}
+.results-month.is-best .results-series-1 .results-bar {
+  filter: drop-shadow(0 0 7px #9ddcc070);
 }
 .results-chart text {
   stroke: none;
 }
 .results-bar {
+  stroke: #ffffff35;
+  stroke-width: 1;
   transform-box: fill-box;
   transform-origin: bottom;
   animation: results-grow 1.3s calc(0.15s * var(--order)) ease-out both;
@@ -1512,7 +1541,7 @@
 .results-chart-note {
   align-items: flex-start;
   font-size: 1.1cqw;
-  color: #514681;
+  color: #e0d9ed;
   padding: 0.8cqw 0.5cqw 0;
   border-top: 1px solid #8176b52b;
 }
@@ -1523,12 +1552,13 @@
 .results-summary {
   display: flex;
   flex-direction: column;
-  gap: 1.1cqw;
+  gap: 0.8cqw;
+  min-height: 0;
 }
 .results-total {
-  padding: 1.3cqw;
+  padding: 1.1cqw;
   border-radius: 1cqw;
-  background: #9ddcc0;
+  background: linear-gradient(135deg, #bcebd6, #8bcdb0);
   color: #233f35;
   animation: story-enter 0.9s 0.3s both;
 }
@@ -1560,6 +1590,10 @@
 }
 .results-cumulative {
   padding: 0.3cqw 1cqw;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .results-cumulative h2 {
   font-size: 1.4cqw;
@@ -1567,7 +1601,9 @@
 .results-cumulative svg {
   display: block;
   width: 100%;
-  height: 7.5cqw;
+  height: 5.5cqw;
+  min-height: 0;
+  flex: 1;
   margin-top: 0.5cqw;
 }
 .results-cumulative text {
@@ -1584,11 +1620,11 @@
   animation: results-draw 2.5s 0.5s both;
 }
 .results-curve.results-series-1 {
-  stroke: #bcb0eb;
+  stroke: #9ddcc0;
 }
 .results-best {
   margin-top: auto;
-  padding: 1cqw 1.2cqw;
+  padding: 0.8cqw 1.2cqw;
   border: 1px solid #9ddcc060;
   border-radius: 0.8cqw;
   background: #ffffff05;
@@ -1610,6 +1646,7 @@
   font-size: 3cqw;
 }
 .results-footer {
+  flex-shrink: 0;
   margin-top: 1.2cqw;
   font-size: 1cqw;
   color: #e0d9ed;
