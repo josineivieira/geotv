@@ -1,4 +1,4 @@
-const SHELL = "geotv-shell-v10";
+const SHELL = "geotv-shell-v11";
 const files = [
   "/assets/geomaritima-logo.png",
   "/player/index.html",
@@ -11,6 +11,7 @@ const files = [
   "/shared/schedule.js",
   "/shared/presentation.js",
   "/shared/client-story.js",
+  "/shared/hydrology.js",
   "/shared/slides.css",
 ];
 self.addEventListener("install", (event) =>

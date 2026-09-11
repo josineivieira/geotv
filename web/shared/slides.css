@@ -538,3 +538,46 @@
     animation: none !important;
   }
 }
+.hydro-slide .story-stage h1 {
+  font-size: 3.2cqw;
+}
+.hydro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5cqw;
+  width: 100%;
+  margin-top: 2cqw;
+  text-align: left;
+}
+.hydro-card {
+  padding: 1.7cqw 2cqw;
+  border: 1px solid #9ddcc040;
+  border-left: 0.3cqw solid #9ddcc0;
+  border-radius: 1cqw;
+  background: #ffffff08;
+  animation: story-enter 0.7s both;
+}
+.hydro-card span {
+  font-size: 1.5cqw;
+  color: #ded8ed;
+}
+.hydro-card strong {
+  display: block;
+  font-size: 4.4cqw;
+  color: #9ddcc0;
+  margin: 0.6cqw 0;
+}
+.hydro-card small,
+.hydro-unit {
+  font-size: 0.4em;
+  font-weight: 400;
+}
+.hydro-card p {
+  font-size: 1.2cqw;
+  margin: 0;
+  color: #ddd5ee;
+}
+.hydro-source {
+  color: #b9afd0;
+  font-size: 1.2cqw;
+}

@@ -22,6 +22,8 @@ export async function validateContent(input) {
   if (!templates.some((t) => t.id === c.template))
     fail(400, "Modelo inválido.");
   c.duration = Number(c.duration);
+  if (c.template === "hydrology" && c.duration < 30)
+    fail(400, "Use pelo menos 30 segundos para as 6 telas do boletim.");
   if (c.template === "client-story" && c.duration < 65)
     fail(
       400,

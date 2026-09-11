@@ -2,6 +2,7 @@ import { request, toast } from "./api.js";
 import { uploadFile } from "./uploads.js";
 import { mountPresentationEditor } from "./presentation-editor.js";
 import { storyDefaults, storyFrames } from "/shared/client-story.js";
+import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
 import {
   templateById,
   renderSlide,
@@ -11,9 +12,14 @@ export function openEditor(original, state, onSaved) {
   const content = structuredClone(original),
     template = templateById(content.template),
     dialog = document.querySelector("#modal");
-  if (content.template === "client-story") {
-    content.fields = { ...storyDefaults, ...content.fields };
-    if (!content.id) content.duration = 130;
+  const animated = ["client-story", "hydrology"].includes(content.template);
+  const sceneCount = content.template === "hydrology" ? 6 : 13;
+  if (animated) {
+    content.fields = {
+      ...(content.template === "hydrology" ? hydroDefaults : storyDefaults),
+      ...content.fields,
+    };
+    if (!content.id) content.duration = sceneCount * 10;
   }
   dialog.classList.add("editor-dialog");
   const input = (key, label, type = "text", value = "", extra = "") =>
@@ -52,22 +58,21 @@ export function openEditor(original, state, onSaved) {
     { once: true },
   );
   const form = document.querySelector("#editor-form");
-  if (content.template === "client-story") {
+  if (animated) {
     const duration = form.elements.duration;
-    duration.min = "65";
-    duration.parentElement.firstChild.textContent =
-      "Duração total das 13 telas (segundos)";
+    duration.min = String(sceneCount * 5);
+    duration.parentElement.firstChild.textContent = `Duração total das ${sceneCount} telas (segundos)`;
     form.querySelector("[name=field_media]").parentElement.hidden = true;
     const play = document.createElement("button");
     play.type = "button";
-    play.textContent = "▶ Assistir às 13 telas";
+    play.textContent = `▶ Assistir às ${sceneCount} telas`;
     dialog.querySelector(".editor-preview").append(play);
     let timer,
       scene = 0;
     const stop = () => {
       clearInterval(timer);
       timer = null;
-      play.textContent = "▶ Assistir às 13 telas";
+      play.textContent = `▶ Assistir às ${sceneCount} telas`;
     };
     play.onclick = () => {
       if (timer) {
@@ -76,14 +81,20 @@ export function openEditor(original, state, onSaved) {
       }
       read();
       scene = 0;
-      const frames = storyFrames(content);
+      const frames =
+        content.template === "hydrology"
+          ? hydroFrames(content)
+          : storyFrames(content);
       const draw = () => {
         dialog.querySelector("#live-preview").innerHTML = renderSlide(
           frames[scene++ % frames.length],
         );
       };
       draw();
-      timer = setInterval(draw, Math.max(5, content.duration / 13) * 1000);
+      timer = setInterval(
+        draw,
+        Math.max(5, content.duration / sceneCount) * 1000,
+      );
       play.textContent = "■ Parar apresentação";
     };
     form.addEventListener("input", stop);

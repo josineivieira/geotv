@@ -1,4 +1,5 @@
 import { storyCards, storyDefaults } from "./client-story.js";
+import { hydroFields, renderHydrology } from "./hydrology.js";
 const textFields = [
   ["subtitle", "Subtítulo"],
   ["message", "Mensagem", "textarea"],
@@ -27,6 +28,14 @@ const rankingFields = [
   ["campaignStatus", "Status da campanha"],
 ];
 export const templates = [
+  [
+    "hydrology",
+    "Boletim dos rios · GeoMarítima",
+    "Indicadores",
+    "hydrology",
+    "purple",
+    hydroFields,
+  ],
   [
     "client-story",
     "Clientes · apresentação animada",
@@ -201,6 +210,7 @@ export function renderSlide(content) {
   const t = templateById(content.template),
     f = content.fields || {},
     e = escapeHtml;
+  if (t.kind === "hydrology") return renderHydrology(content, e);
   if (t.kind === "client-story") {
     const values = { ...storyDefaults, ...f };
     const index = Math.max(0, Math.min(12, Number(values.storyScene) || 0));
