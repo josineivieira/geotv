@@ -1,4 +1,5 @@
 import test from "node:test";
+import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
@@ -198,6 +199,25 @@ test("URL inválida não expõe credenciais e senha codificada é preservada", (
     decodeURIComponent(new URL(postgresConnection(raw).url).password),
     password,
   );
+});
+
+test("queda de conexão ativa rejeita a transação e descarta o cliente", async () => {
+  const client = new EventEmitter();
+  const failure = new Error("Connection terminated unexpectedly");
+  let released;
+  client.query = async () => ({ rows: [], rowCount: 0 });
+  client.release = (error) => {
+    released = error;
+  };
+  const db = createDatabase({ pool: { connect: async () => client } });
+  await assert.rejects(
+    db.transaction(async () => {
+      client.emit("error", failure);
+    }),
+    /Connection terminated/,
+  );
+  assert.equal(released, failure);
+  assert.equal(client.listenerCount("error"), 0);
 });
 
 test("transações PostgreSQL usam a mesma conexão e liberam após falha", async () => {

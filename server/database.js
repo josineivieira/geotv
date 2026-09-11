@@ -47,8 +47,19 @@ export function createDatabase({
           connectionTimeoutMillis: 15000,
           idleTimeoutMillis: 30000,
           statement_timeout: 30000,
+          keepAlive: true,
+          keepAliveInitialDelayMillis: 10000,
         })
       : null);
+  // Pool handles idle clients; checked-out clients also need an error listener.
+  pool?.on?.("connect", (client) => {
+    client.on("error", (error) => {
+      console.error(
+        "Conexão PostgreSQL ativa interrompida:",
+        error.code || "erro de rede",
+      );
+    });
+  });
   pool?.on?.("error", (error) =>
     console.error(
       "Conexão PostgreSQL interrompida:",
@@ -107,18 +118,25 @@ export function createDatabase({
           }
         });
       const client = await pool.connect();
+      let connectionError;
+      const onError = (error) => {
+        connectionError = error;
+      };
+      client.on?.("error", onError);
       try {
         await client.query("BEGIN");
         // Serialize GeoTV transactions across processes, including first boot.
         await client.query("SELECT pg_advisory_xact_lock(714025, 1)");
         const result = await context.run(client, fn);
+        if (connectionError) throw connectionError;
         await client.query("COMMIT");
         return result;
       } catch (error) {
         await client.query("ROLLBACK").catch(() => {});
         throw error;
       } finally {
-        client.release();
+        client.removeListener?.("error", onError);
+        client.release(connectionError);
       }
     },
     async close() {
