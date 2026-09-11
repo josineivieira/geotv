@@ -58,10 +58,11 @@ export function renderAlerts(content, e) {
   });
   const number = (row) =>
     `<strong>${row.number}</strong><span>${row.count === 1 ? "registro" : "registros"}</span>`;
+  const warning = `<svg class="alerts-warning" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5 61 57H3Z" fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/><path d="M32 23v15" stroke="#17191d" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="47" r="3" fill="#17191d"/></svg>`;
   const body =
     scene === 0
-      ? `<section class="alerts-overview"><div class="alerts-eyebrow">ATENÇÃO AOS PROCESSOS</div><h1>Pontos de atenção</h1><div class="alerts-grid">${rows.map((row, i) => `<div class="alerts-tile" style="--order:${i}"><span class="alerts-index">0${i + 1}</span>${number(row)}<h2>${e(row.title)}</h2><p>${e(row.description)}</p></div>`).join("")}</div></section>`
-      : `<section class="alerts-focus"><div class="alerts-copy"><div class="alerts-eyebrow">PONTO DE ATENÇÃO · 0${scene} / 04</div><h1>${e(rows[scene - 1].title)}</h1><p>${e(rows[scene - 1].description)}</p></div><div class="alerts-quantity">${number(rows[scene - 1])}<span class="alerts-count-caption">${rows[scene - 1].count === 0 ? "Nenhum registro nesta categoria" : "Painel diário de processos"}</span></div></section>`;
+      ? `<section class="alerts-overview"><div class="alerts-heading">${warning}<div><div class="alerts-eyebrow">MONITORAMENTO DE PROCESSOS</div><h1>Atenção, operação!</h1></div></div><div class="alerts-grid">${rows.map((row, i) => `<div class="alerts-tile" style="--order:${i}"><span class="alerts-index">0${i + 1}</span>${number(row)}<h2>${e(row.title)}</h2><p>${e(row.description)}</p></div>`).join("")}</div></section>`
+      : `<section class="alerts-focus"><div class="alerts-copy"><div class="alerts-eyebrow">${warning} PONTO DE ATENÇÃO · 0${scene} / 04</div><h1>${e(rows[scene - 1].title)}</h1><p>${e(rows[scene - 1].description)}</p></div><div class="alerts-quantity">${number(rows[scene - 1])}<span class="alerts-count-caption">${rows[scene - 1].count === 0 ? "Nenhum registro nesta categoria" : "Painel diário de processos"}</span></div></section>`;
   return `<article class="tv-slide process-alerts"><header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span class="alerts-badge">! &nbsp; ALERTAS OPERACIONAIS</span></header>${body}<footer><span>${e(f.reference)}${content.demo ? " · DEMONSTRAÇÃO" : ""}</span><div class="alerts-steps" aria-label="Tela ${scene + 1} de 5">${rows
     .concat([{}])
     .map((_, i) => `<i class="${i === scene ? "active" : ""}"></i>`)

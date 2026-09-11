@@ -588,19 +588,47 @@
   display: flex;
   flex-direction: column;
   padding: 2.5cqw 3.5cqw;
-  background: radial-gradient(ellipse at 85% 30%, #51416e, #282337 70%);
+  background: radial-gradient(ellipse at 90% 20%, #553018, #17191d 65%);
   color: #fff;
 }
 .process-alerts::before {
   content: "";
   position: absolute;
-  width: 38cqw;
-  height: 60cqw;
-  right: -15cqw;
-  top: -10cqw;
-  border: 3cqw solid #9ddcc010;
-  transform: rotate(35deg);
+  inset: 0 0 auto;
+  height: 0.8cqw;
+  background: repeating-linear-gradient(
+    135deg,
+    #ffc247 0 1.2cqw,
+    #17191d 1.2cqw 2.4cqw
+  );
   z-index: -1;
+}
+.process-alerts::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 0.45cqw;
+  background: repeating-linear-gradient(
+    135deg,
+    #ffc247 0 1.2cqw,
+    #17191d 1.2cqw 2.4cqw
+  );
+}
+.alerts-heading {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  margin-bottom: 1.5cqw;
+}
+.alerts-warning {
+  width: 5.5cqw;
+  height: 5.5cqw;
+  flex-shrink: 0;
+  color: #ffc247;
+}
+.alerts-eyebrow .alerts-warning {
+  width: 2.4cqw;
+  height: 2.4cqw;
 }
 .process-alerts header,
 .process-alerts footer {
@@ -615,10 +643,12 @@
   object-fit: contain;
 }
 .alerts-badge {
-  border: 1px solid #e5bc694d;
-  border-radius: 3cqw;
+  border: 1px solid #ffc247;
+  border-radius: 0.35cqw;
   padding: 0.7cqw 1.2cqw;
-  color: #f4d08d;
+  color: #17191d;
+  background: #ffc247;
+  font-weight: 900;
   font-size: 1.1cqw;
   letter-spacing: 0.12cqw;
   animation: alert-glow 3s ease-in-out infinite;
@@ -630,13 +660,19 @@
   justify-content: center;
 }
 .alerts-eyebrow {
-  color: #9ddcc0;
+  display: flex;
+  align-items: center;
+  gap: 0.8cqw;
+  color: #ffc247;
+  font-weight: 800;
   letter-spacing: 0.22cqw;
   font-size: 1.1cqw;
 }
 .alerts-overview h1 {
-  font-size: 3.4cqw;
-  margin: 0.7cqw 0 1.5cqw;
+  font-size: 4.2cqw;
+  text-transform: uppercase;
+  font-weight: 900;
+  margin: 0.3cqw 0 0;
 }
 .alerts-grid {
   display: grid;
@@ -646,10 +682,10 @@
 .alerts-tile {
   position: relative;
   padding: 1.5cqw;
-  border: 1px solid #a99aca55;
-  border-top: 0.3cqw solid #9ddcc0;
-  border-radius: 1cqw;
-  background: linear-gradient(145deg, #ffffff0d, #ffffff03);
+  border: 1px solid #ffc24755;
+  border-top: 0.4cqw solid #ffc247;
+  border-radius: 0.35cqw;
+  background: linear-gradient(145deg, #ffc24712, #ffffff03);
   animation: story-enter 0.8s calc(var(--order) * 0.2s) both;
 }
 .alerts-index {
@@ -657,17 +693,17 @@
   top: 1.2cqw;
   right: 1.2cqw;
   font-size: 1cqw;
-  color: #b5a8ce;
+  color: #ffc247;
 }
 .alerts-tile strong {
   display: block;
   font-size: 5.8cqw;
   line-height: 1.1;
-  color: #f4d08d;
+  color: #ffc247;
   font-variant-numeric: tabular-nums;
 }
 .alerts-tile > span:not(.alerts-index) {
-  color: #c9bedc;
+  color: #e0d7c9;
   font-size: 1.1cqw;
 }
 .alerts-tile h2 {
@@ -678,7 +714,7 @@
 .alerts-tile p {
   font-size: 1.15cqw;
   line-height: 1.5;
-  color: #d2c9e1;
+  color: #e0d7c9;
   margin: 0;
 }
 .alerts-focus {
@@ -700,7 +736,9 @@
 .alerts-copy p {
   font-size: 2cqw;
   line-height: 1.5;
-  color: #d2c9e1;
+  color: #e0d7c9;
+  border-left: 0.3cqw solid #ffc247;
+  padding-left: 1.2cqw;
   animation: story-enter 0.8s 0.5s both;
 }
 .alerts-quantity {
@@ -709,31 +747,32 @@
   justify-content: center;
   align-items: center;
   min-height: 26cqw;
-  border: 1px solid #9ddcc055;
-  border-radius: 2cqw;
-  background: #ffffff06;
-  box-shadow: 0 0 5cqw #9ddcc009;
+  border: 1px solid #ffc24780;
+  border-top: 0.6cqw solid #ffc247;
+  border-radius: 0.5cqw;
+  background: linear-gradient(145deg, #ffc24720, #ffc24705);
+  box-shadow: 0 0 5cqw #ff962015;
   animation: sales-rise 1s 0.2s both;
 }
 .alerts-quantity strong {
-  color: #f4d08d;
+  color: #ffc247;
   font-size: 13cqw;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 .alerts-quantity > span {
   font-size: 2cqw;
-  color: #9ddcc0;
+  color: #ffe3a3;
 }
 .alerts-quantity .alerts-count-caption {
   font-size: 1.05cqw;
   margin-top: 2cqw;
-  color: #c9bedc;
+  color: #e0d7c9;
 }
 .process-alerts footer {
   padding-top: 1.2cqw;
-  border-top: 1px solid #9ddcc02b;
-  color: #beb1d3;
+  border-top: 1px solid #ffc24740;
+  color: #cec5b8;
   font-size: 0.85cqw;
 }
 .alerts-steps {
@@ -748,7 +787,7 @@
 }
 .alerts-steps .active {
   width: 2cqw;
-  background: #9ddcc0;
+  background: #ffc247;
 }
 @keyframes alert-glow {
   50% {
