@@ -22,6 +22,23 @@ export async function validateContent(input) {
   if (!templates.some((t) => t.id === c.template))
     fail(400, "Modelo inválido.");
   c.duration = Number(c.duration);
+  if (c.template === "process-alerts") {
+    if (c.duration < 25)
+      fail(400, "Use pelo menos 25 segundos para as 5 telas de alertas.");
+    for (let i = 0; i < 4; i++) {
+      const value = c.fields?.[`count${i}`];
+      if (
+        value !== undefined &&
+        (String(value).trim() === "" ||
+          !Number.isSafeInteger(Number(value)) ||
+          Number(value) < 0)
+      )
+        fail(
+          400,
+          "As quantidades dos alertas devem ser números inteiros positivos ou zero.",
+        );
+    }
+  }
   if (c.template === "sales-show" && c.duration < 15)
     fail(400, "Use pelo menos 15 segundos para as 3 telas da campanha.");
   if (c.template === "hydrology" && c.duration < 30)
