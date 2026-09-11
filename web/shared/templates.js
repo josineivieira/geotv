@@ -2,6 +2,7 @@ import { storyCards, storyDefaults } from "./client-story.js";
 import { hydroFields, renderHydrology } from "./hydrology.js";
 import { salesFields, renderSales } from "./sales-show.js";
 import { alertFields, renderAlerts } from "./process-alerts.js";
+import { goalFields, renderGoals } from "./goals.js";
 const textFields = [
   ["subtitle", "Subtítulo"],
   ["message", "Mensagem", "textarea"],
@@ -30,6 +31,7 @@ const rankingFields = [
   ["campaignStatus", "Status da campanha"],
 ];
 export const templates = [
+  ["goals", "Na direção da meta", "Indicadores", "goals", "green", goalFields],
   [
     "process-alerts",
     "Alertas operacionais · GeoMarítima",
@@ -231,6 +233,7 @@ export function renderSlide(content) {
   if (t.kind === "hydrology") return renderHydrology(content, e);
   if (t.kind === "sales-show") return renderSales(content, e);
   if (t.kind === "process-alerts") return renderAlerts(content, e);
+  if (t.kind === "goals") return renderGoals(content, e);
   if (t.kind === "client-story") {
     const values = { ...storyDefaults, ...f };
     const index = Math.max(0, Math.min(12, Number(values.storyScene) || 0));

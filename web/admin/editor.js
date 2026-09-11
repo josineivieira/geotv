@@ -5,6 +5,7 @@ import { storyDefaults, storyFrames } from "/shared/client-story.js";
 import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
 import { salesDefaults, salesFrames } from "/shared/sales-show.js";
 import { alertDefaults, alertFrames } from "/shared/process-alerts.js";
+import { goalDefaults } from "/shared/goals.js";
 import {
   templateById,
   renderSlide,
@@ -42,6 +43,9 @@ export function openEditor(original, state, onSaved) {
     if (!content.id) content.duration = sceneCount * 10;
   }
   dialog.classList.add("editor-dialog");
+  if (content.template === "goals") {
+    content.fields = { ...goalDefaults, ...content.fields };
+  }
   const input = (key, label, type = "text", value = "", extra = "") =>
     `<label>${e(label)}${type === "textarea" ? `<textarea name="${key}" ${extra}>${e(value)}</textarea>` : type === "checkbox" ? `<input type="checkbox" name="${key}" ${value ? "checked" : ""}>` : `<input type="${type}" name="${key}" value="${e(value)}" ${extra}>`}</label>`;
   const localDate = (value) =>
