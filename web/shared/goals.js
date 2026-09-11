@@ -67,7 +67,7 @@ export function renderGoals(content, e) {
     ...goalMetrics(f[`${key}Current`], f[`${key}Target`]),
   }));
   const today = rows[3];
-  return `<article class="tv-slide goals-slide"><header class="goals-header"><span class="slide-brand">geo<span>tv</span><i></i></span><span>DESEMPENHO / METAS</span></header><div class="goals-title"><div><span class="goals-kicker">CADA RESULTADO CONTA</span><h1>${e(content.title || "Na direção da meta")}</h1></div><span class="goals-unit">${e(f.unit)}</span></div><section class="goals-board"><div class="goals-periods">${rows
+  return `<article class="tv-slide goals-slide"><header class="goals-header"><img class="goals-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>DESEMPENHO / METAS</span></header><div class="goals-title"><div><span class="goals-kicker">CADA RESULTADO CONTA</span><h1>${e(content.title || "Na direção da meta")}</h1></div><span class="goals-unit">${e(f.unit)}</span></div><section class="goals-board"><div class="goals-periods">${rows
     .slice(0, 3)
     .map(
       (row, i) =>

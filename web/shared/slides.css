@@ -1030,9 +1030,14 @@
   }
 }
 
+@property --goals-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 .goals-slide {
   background:
-    radial-gradient(ellipse at 95% 0%, #25423e, transparent 50%), #101c21;
+    radial-gradient(ellipse at 95% 0%, #65578c, transparent 50%), #282337;
   color: #f4f7f5;
   padding: 2.4cqw 3.5cqw;
 }
@@ -1041,7 +1046,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 0.35cqw;
-  background: linear-gradient(90deg, #dbef85, #6fe2ba, transparent);
+  background: linear-gradient(90deg, #9ddcc0, #8176b5, transparent);
 }
 .goals-header,
 .goals-title,
@@ -1055,15 +1060,22 @@
   gap: 1cqw;
 }
 .goals-header {
-  color: #a6beb9;
+  color: #c9bedc;
   font-size: 0.95cqw;
   letter-spacing: 0.18cqw;
 }
+.goals-logo {
+  width: 13cqw;
+  height: 3.5cqw;
+  object-fit: contain;
+  object-position: left center;
+}
 .goals-title {
   margin: 1.5cqw 0 1.6cqw;
+  animation: story-enter 0.9s both;
 }
 .goals-kicker {
-  color: #dbef85;
+  color: #9ddcc0;
   font-size: 0.85cqw;
   font-weight: 700;
   letter-spacing: 0.25cqw;
@@ -1077,7 +1089,7 @@
 }
 .goals-unit {
   font-size: 1.1cqw;
-  color: #a6beb9;
+  color: #c9bedc;
 }
 .goals-board {
   flex: 1;
@@ -1092,16 +1104,16 @@
   gap: 0.9cqw;
 }
 .goals-card {
-  --goal-color: #edc778;
+  --goal-color: #cec3f0;
   padding: 1cqw 1.5cqw;
   border: 1px solid #ffffff16;
   border-radius: 0.8cqw;
   background: #ffffff04;
-  animation: story-enter 0.7s calc(var(--order) * 0.15s) both;
+  animation: story-enter 0.9s calc(0.4s + var(--order) * 0.35s) both;
 }
 .goals-card.is-met,
 .goals-today.is-met {
-  --goal-color: #b9f18b;
+  --goal-color: #9ddcc0;
 }
 .goals-card-top h2 {
   margin: 0;
@@ -1124,7 +1136,7 @@
   letter-spacing: -0.08cqw;
 }
 .goals-numbers > span {
-  color: #a6beb9;
+  color: #c9bedc;
   font-size: 1cqw;
 }
 .goals-numbers > b {
@@ -1139,30 +1151,64 @@
   background: #ffffff10;
 }
 .goals-track i {
+  position: relative;
+  overflow: hidden;
   display: block;
   width: var(--progress);
   height: 100%;
   background: var(--goal-color);
   transform-origin: left;
-  animation: goals-fill 1.4s ease-out both;
+  animation: goals-fill 2s calc(0.7s + var(--order) * 0.35s) ease-out both;
+}
+.goals-track i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    #fff9 50%,
+    transparent 70%
+  );
+  animation: goals-shine 5s calc(var(--order) * 0.5s) ease-in-out infinite;
 }
 .goals-card p {
   margin: 0.5cqw 0 0;
-  color: #a6beb9;
+  color: #c9bedc;
   font-size: 0.85cqw;
 }
 .goals-today {
-  --goal-color: #edc778;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  --goal-color: #cec3f0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #b9f18b40;
+  border: 1px solid #9ddcc040;
   border-radius: 1.2cqw;
   padding: 1.5cqw 2cqw;
   background:
-    radial-gradient(ellipse at 50% 40%, #92de8830, transparent 65%), #ffffff05;
+    radial-gradient(ellipse at 50% 40%, #9ddcc030, transparent 65%), #ffffff05;
   animation: story-enter 0.9s 0.25s both;
+}
+.goals-today::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    #9ddcc018 50%,
+    transparent 70%
+  );
+  animation: goals-shine 7s 2s ease-in-out infinite;
+}
+.goals-today.is-met .goals-status {
+  animation: goals-celebrate 3.5s 2.5s ease-in-out infinite;
 }
 .goals-today-top {
   width: 100%;
@@ -1179,6 +1225,7 @@
   color: var(--goal-color);
 }
 .goals-ring {
+  position: relative;
   width: 18cqw;
   height: 18cqw;
   flex-shrink: 0;
@@ -1187,13 +1234,23 @@
   border-radius: 50%;
   margin: 1cqw 0;
   background: conic-gradient(var(--goal-color) var(--sweep), #ffffff10 0);
-  box-shadow: 0 0 3cqw #b9f18b12;
+  box-shadow: 0 0 3cqw #9ddcc012;
+  animation: goals-ring-fill 2.4s 0.7s ease-out both;
+}
+.goals-today.is-met .goals-ring::after {
+  content: "";
+  position: absolute;
+  inset: -0.35cqw;
+  border: 1px solid var(--goal-color);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: goals-ripple 3.5s 3.1s ease-out infinite both;
 }
 .goals-ring > div {
   width: 16.7cqw;
   height: 16.7cqw;
   border-radius: 50%;
-  background: #1a302e;
+  background: #302943;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1202,7 +1259,7 @@
 }
 .goals-ring span {
   font-size: 0.85cqw;
-  color: #bed1c6;
+  color: #d2c9e1;
   max-width: 13cqw;
   text-align: center;
 }
@@ -1217,6 +1274,7 @@
   align-items: center;
   gap: 1cqw;
   color: var(--goal-color);
+  animation: story-enter 0.8s 2s both;
 }
 .goals-today-result strong {
   font-size: 2.7cqw;
@@ -1231,7 +1289,7 @@
 .goals-gap {
   margin: 0.6cqw 0;
   font-size: 1cqw;
-  color: #d5e4d9;
+  color: #e0d9ed;
 }
 .goals-cheer {
   padding-top: 0.8cqw;
@@ -1243,7 +1301,7 @@
 }
 .goals-footer {
   margin-top: 1.3cqw;
-  color: #94ada7;
+  color: #beb1d3;
   font-size: 0.8cqw;
 }
 .goals-footer > span:last-child {
@@ -1257,8 +1315,60 @@
     transform: scaleX(1);
   }
 }
+@keyframes goals-ring-fill {
+  from {
+    --goals-angle: 0deg;
+    background: conic-gradient(
+      var(--goal-color) var(--goals-angle),
+      #ffffff10 0
+    );
+  }
+  to {
+    --goals-angle: var(--sweep);
+    background: conic-gradient(
+      var(--goal-color) var(--goals-angle),
+      #ffffff10 0
+    );
+  }
+}
+@keyframes goals-shine {
+  0%,
+  15% {
+    transform: translateX(-110%);
+  }
+  55%,
+  100% {
+    transform: translateX(110%);
+  }
+}
+@keyframes goals-celebrate {
+  0%,
+  100% {
+    box-shadow: 0 0 0 #9ddcc000;
+  }
+  50% {
+    box-shadow: 0 0 1.4cqw #9ddcc045;
+    background: #9ddcc018;
+  }
+}
+@keyframes goals-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  80%,
+  100% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .goals-slide * {
+  .goals-slide *,
+  .goals-slide *::before,
+  .goals-slide *::after {
     animation: none !important;
   }
 }
