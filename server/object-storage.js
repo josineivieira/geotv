@@ -10,6 +10,16 @@ function checkFile(file) {
     throw Object.assign(new Error("Arquivo inválido."), { status: 400 });
 }
 function storageError(error) {
+  const code = Number(error.statusCode || error.status);
+  const label =
+    Number.isInteger(code) && code >= 100 && code <= 599
+      ? `HTTP ${code}`
+      : "sem resposta HTTP";
+  const guidance = [401, 403].includes(code)
+    ? "Acesso recusado. Confira se SUPABASE_URL e a chave secreta de servidor pertencem ao mesmo projeto; não use anon/publishable."
+    : code >= 500
+      ? "O serviço retornou falha. Confira a disponibilidade do projeto e do Storage no Supabase."
+      : "Confira SUPABASE_URL, a chave de servidor e o bucket. Se trocou de projeto, atualize também as variáveis do Storage.";
   const tooLarge =
     String(error.statusCode || error.status) === "413" ||
     /maximum allowed size|exceeded.*size/i.test(error.message || "");
@@ -17,7 +27,7 @@ function storageError(error) {
     new Error(
       tooLarge
         ? "Arquivo acima do limite do Supabase Storage. Reduza o arquivo ou ajuste o limite do bucket/plano."
-        : "Falha no Supabase Storage. Confira URL, chave de servidor e bucket nas variáveis do Render.",
+        : `Falha no Supabase Storage (${label}). ${guidance}`,
     ),
     { status: tooLarge ? 413 : 502 },
   );

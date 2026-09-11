@@ -71,6 +71,33 @@ test("Storage privado: upload, leitura com Range, HEAD e exclusão", async () =>
   await assert.rejects(adapter.put("../secret", Buffer.from([])), /inválido/);
 });
 
+test("Storage identifica acesso recusado e indisponibilidade sem expor erro original", async () => {
+  for (const status of [401, 403, 500, 503]) {
+    const adapter = createObjectStorage({
+      client: {
+        storage: {
+          from: () => ({}),
+          getBucket: async () => ({
+            error: {
+              statusCode: String(status),
+              message: "credencial-secreta",
+            },
+          }),
+        },
+      },
+    });
+    await assert.rejects(adapter.initialize(), (error) => {
+      assert.match(error.message, new RegExp(`HTTP ${status}`));
+      assert.ok(!error.message.includes("credencial-secreta"));
+      assert.match(
+        error.message,
+        status < 500 ? /Acesso recusado/ : /serviço retornou falha/,
+      );
+      return true;
+    });
+  }
+});
+
 test("Storage: exige configuração na nuvem, impede bucket público e trata limite", async () => {
   assert.throws(() => createObjectStorage({ required: true }), /SUPABASE_URL/);
   assert.throws(
