@@ -59,6 +59,7 @@ async function sync() {
   busy = true;
   try {
     const res = await fetch("/api/channels/" + encodeURIComponent(id), {
+      cache: "no-store",
       signal: AbortSignal.timeout(10000),
     });
     if ([401, 403, 404].includes(res.status)) {
@@ -70,7 +71,12 @@ async function sync() {
     }
     if (!res.ok) throw new Error();
     const next = await res.json();
-    if (JSON.stringify(next) !== JSON.stringify(channel)) presenter.cancel();
+    if (JSON.stringify(next) !== JSON.stringify(channel)) {
+      presenter.cancel();
+      currentVersion = null;
+      deadline = 0;
+      index = -1;
+    }
     channel = next;
     tick();
   } catch {
@@ -82,14 +88,19 @@ async function sync() {
   }
 }
 const timer = setInterval(tick, 500),
-  refresh = setInterval(sync, 10000);
-window.addEventListener(
-  "pagehide",
-  () => {
-    clearInterval(timer);
-    clearInterval(refresh);
-    presenter.cancel();
-  },
-  { once: true },
-);
+  refresh = setInterval(sync, 5000);
+window.addEventListener("online", sync);
+window.addEventListener("pageshow", sync);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    tick();
+    sync();
+  }
+});
+window.addEventListener("pagehide", (event) => {
+  if (event.persisted) return;
+  clearInterval(timer);
+  clearInterval(refresh);
+  presenter.cancel();
+});
 sync();

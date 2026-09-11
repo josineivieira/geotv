@@ -1,4 +1,4 @@
-const SHELL = "geotv-shell-v14";
+const SHELL = "geotv-shell-v15";
 const files = [
   "/assets/geomaritima-logo.png",
   "/player/index.html",

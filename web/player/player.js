@@ -19,6 +19,25 @@ let snapshot = null,
   syncing = false,
   syncedAt = null,
   lastBeat = 0;
+let caching = false,
+  pendingCache = null;
+async function persist(next) {
+  pendingCache = next;
+  if (caching) return;
+  caching = true;
+  try {
+    while (pendingCache && token) {
+      const value = pendingCache;
+      pendingCache = null;
+      try {
+        await cacheMedia(value);
+        if (token && snapshot === value) await writeSnapshot(id, value);
+      } catch {}
+    }
+  } finally {
+    caching = false;
+  }
+}
 async function revoke() {
   token = null;
   snapshot = null;
@@ -91,6 +110,7 @@ async function sync() {
   syncing = true;
   try {
     const response = await fetch(`/api/player/${id}/snapshot`, {
+      cache: "no-store",
       headers: { Authorization: "Bearer " + token },
       signal: AbortSignal.timeout(15000),
     });
@@ -103,23 +123,16 @@ async function sync() {
     if (!Array.isArray(next.contents) || !Number.isInteger(next.version))
       throw new Error("Programação inválida");
     if (snapshot && JSON.stringify(next) === JSON.stringify(snapshot)) return;
-    // Alerts remain independent from large media downloads in a new publication.
-    if (
-      snapshot &&
-      JSON.stringify(next.alerts) !== JSON.stringify(snapshot.alerts)
-    ) {
-      snapshot = { ...snapshot, alerts: next.alerts };
-      presenter.cancel();
-      tick();
-      await writeSnapshot(id, snapshot);
-    }
-    await cacheMedia(next);
     if (!token) return;
-    await writeSnapshot(id, next);
     snapshot = next;
     presenter.cancel();
+    current = null;
+    index = -1;
+    deadline = 0;
     syncedAt = new Date().toISOString();
     tick();
+    // Offline downloads must never hold up a live publication or the next sync.
+    void persist(next);
   } catch {
     if (!snapshot) opening("Seu canal está aguardando a primeira conexão.");
   } finally {
@@ -172,18 +185,22 @@ async function start() {
 }
 const tickTimer = setInterval(tick, 1000),
   beatTimer = setInterval(heartbeat, 5000),
-  syncTimer = setInterval(sync, 30000);
+  syncTimer = setInterval(sync, 5000);
 window.addEventListener("online", sync);
-window.addEventListener(
-  "pagehide",
-  () => {
-    events?.close();
-    clearInterval(tickTimer);
-    clearInterval(beatTimer);
-    clearInterval(syncTimer);
-    presenter.cancel();
-    window.removeEventListener("online", sync);
-  },
-  { once: true },
-);
+window.addEventListener("pageshow", sync);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    tick();
+    sync();
+  }
+});
+window.addEventListener("pagehide", (event) => {
+  if (event.persisted) return;
+  events?.close();
+  clearInterval(tickTimer);
+  clearInterval(beatTimer);
+  clearInterval(syncTimer);
+  presenter.cancel();
+  window.removeEventListener("online", sync);
+});
 start();
