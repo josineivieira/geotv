@@ -581,3 +581,232 @@
   color: #b9afd0;
   font-size: 1.2cqw;
 }
+.sales-show {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5cqw 4cqw;
+  background: radial-gradient(ellipse at top, #fff 30%, #ede9f6);
+  color: #302943;
+}
+.sales-show header,
+.sales-show footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1;
+}
+.sales-show header img {
+  width: 12cqw;
+  height: 5cqw;
+  object-fit: contain;
+}
+.sales-show header > span {
+  font-size: 1.3cqw;
+  font-weight: 700;
+  color: #65578c;
+}
+.sales-show footer {
+  padding-top: 1cqw;
+  border-top: 1px solid #8176b54d;
+  font-size: 1cqw;
+  letter-spacing: 0.1cqw;
+}
+.sales-show footer b {
+  color: #68ae8c;
+}
+.sales-flags {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 2cqw;
+  opacity: 0.2;
+  z-index: -1;
+}
+.sales-flags i {
+  width: 3cqw;
+  height: 6cqw;
+  background: #8176b5;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
+  transform-origin: top;
+  animation: sales-sway 4s calc(var(--flag) * -0.3s) ease-in-out infinite
+    alternate;
+}
+.sales-flags i:nth-child(even) {
+  background: #74bf9b;
+}
+.sales-intro,
+.sales-winner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.sales-kicker {
+  font-size: 1.2cqw;
+  letter-spacing: 0.35cqw;
+  color: #65578c;
+  animation: story-enter 0.7s both;
+}
+.sales-intro h1 {
+  font-size: 8cqw;
+  line-height: 1;
+  text-transform: uppercase;
+  margin: 1.5cqw 0;
+  animation: story-enter 0.8s 0.2s both;
+}
+.sales-intro em {
+  color: #8176b5;
+  font-style: normal;
+}
+.sales-intro p,
+.sales-winner p {
+  font-size: 2cqw;
+  margin: 1.2cqw 0;
+  animation: story-enter 0.8s 1s both;
+}
+.sales-invitation {
+  margin-top: 1.5cqw;
+  font-size: 1.2cqw;
+  color: #65578c;
+  animation: story-enter 0.7s 1.7s both;
+}
+.sales-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+}
+.sales-board h1 {
+  font-size: 4cqw;
+  text-transform: uppercase;
+  color: #8176b5;
+  margin: 0 0 1.5cqw;
+}
+.sales-podiums {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5cqw;
+  min-height: 25cqw;
+}
+.sales-podium {
+  width: 20cqw;
+  min-width: 0;
+  border: 2px solid #8176b5;
+  border-radius: 1.5cqw;
+  padding: 1.5cqw 0.8cqw;
+  background: linear-gradient(#fff, #ede9f6);
+  box-shadow: 0 0.7cqw 1cqw #30294320;
+  animation: sales-rise 0.9s calc((3 - var(--rank)) * 0.55s) both;
+}
+.sales-podium.rank-1 {
+  border-color: #dbab37;
+  padding-top: 3cqw;
+  padding-bottom: 2.5cqw;
+}
+.sales-podium.rank-2 {
+  border-color: #a9a7b3;
+  padding-top: 2cqw;
+}
+.sales-podium.rank-3 {
+  border-color: #bc7c40;
+}
+.sales-medal {
+  display: inline-grid;
+  place-items: center;
+  width: 4cqw;
+  height: 4cqw;
+  border-radius: 50%;
+  background: #8176b5;
+  color: white;
+  font-size: 2cqw;
+  font-weight: 800;
+}
+.rank-1 .sales-medal {
+  background: linear-gradient(135deg, #ffe394, #c99220);
+  color: #6a4800;
+}
+.rank-2 .sales-medal {
+  background: #d3d2d8;
+  color: #53515e;
+}
+.rank-3 .sales-medal {
+  background: #d29b64;
+  color: #603815;
+}
+.sales-podium h2 {
+  font-size: 2.5cqw;
+  margin: 1cqw 0 0.5cqw;
+  overflow-wrap: anywhere;
+}
+.sales-star {
+  display: block;
+  font-size: 1.5cqw;
+  color: #74bf9b;
+}
+.sales-podium strong {
+  display: block;
+  margin-top: 0.5cqw;
+  font-size: 3.7cqw;
+  color: #8176b5;
+}
+.sales-podium small {
+  font-size: 0.5em;
+}
+.sales-motto {
+  margin: 2cqw 0 1cqw;
+  font-size: 1.7cqw;
+  color: #65578c;
+  animation: story-enter 0.7s 2.5s both;
+}
+.sales-trophy {
+  color: #d2a13a;
+  font-size: 4cqw;
+  animation: sales-sway 2s ease-in-out infinite alternate;
+}
+.sales-winner h1 {
+  font-size: 5cqw;
+  margin: 0.3cqw 0;
+  animation: story-enter 0.8s both;
+}
+.sales-winner strong {
+  font-size: 9cqw;
+  line-height: 1.1;
+  color: #8176b5;
+  animation: story-enter 0.8s 0.3s both;
+}
+.sales-points-label {
+  font-size: 1.2cqw;
+  letter-spacing: 0.3cqw;
+  color: #65578c;
+}
+@keyframes sales-rise {
+  from {
+    opacity: 0;
+    transform: translateY(3cqw) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes sales-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sales-show * {
+    animation: none !important;
+  }
+}

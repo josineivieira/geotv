@@ -1,7 +1,9 @@
 import { storyFrames } from "./client-story.js";
 import { hydroFrames } from "./hydrology.js";
+import { salesFrames } from "./sales-show.js";
 export const transitions = ["fade", "slide", "zoom", "none"];
 export function presentationFrames(content) {
+  if (content.template === "sales-show") return salesFrames(content);
   if (content.template === "hydrology") return hydroFrames(content);
   if (content.template === "client-story") return storyFrames(content);
   if (content.template !== "presentation" || !content.slides?.length)

@@ -3,6 +3,7 @@ import { uploadFile } from "./uploads.js";
 import { mountPresentationEditor } from "./presentation-editor.js";
 import { storyDefaults, storyFrames } from "/shared/client-story.js";
 import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
+import { salesDefaults, salesFrames } from "/shared/sales-show.js";
 import {
   templateById,
   renderSlide,
@@ -12,11 +13,22 @@ export function openEditor(original, state, onSaved) {
   const content = structuredClone(original),
     template = templateById(content.template),
     dialog = document.querySelector("#modal");
-  const animated = ["client-story", "hydrology"].includes(content.template);
-  const sceneCount = content.template === "hydrology" ? 6 : 13;
+  const animated = ["client-story", "hydrology", "sales-show"].includes(
+    content.template,
+  );
+  const sceneCount =
+    content.template === "sales-show"
+      ? 3
+      : content.template === "hydrology"
+        ? 6
+        : 13;
   if (animated) {
     content.fields = {
-      ...(content.template === "hydrology" ? hydroDefaults : storyDefaults),
+      ...(content.template === "sales-show"
+        ? salesDefaults
+        : content.template === "hydrology"
+          ? hydroDefaults
+          : storyDefaults),
       ...content.fields,
     };
     if (!content.id) content.duration = sceneCount * 10;
@@ -82,9 +94,11 @@ export function openEditor(original, state, onSaved) {
       read();
       scene = 0;
       const frames =
-        content.template === "hydrology"
-          ? hydroFrames(content)
-          : storyFrames(content);
+        content.template === "sales-show"
+          ? salesFrames(content)
+          : content.template === "hydrology"
+            ? hydroFrames(content)
+            : storyFrames(content);
       const draw = () => {
         dialog.querySelector("#live-preview").innerHTML = renderSlide(
           frames[scene++ % frames.length],
