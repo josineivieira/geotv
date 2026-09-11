@@ -1,4 +1,4 @@
-const SHELL = "geotv-shell-v11";
+const SHELL = "geotv-shell-v12";
 const files = [
   "/assets/geomaritima-logo.png",
   "/player/index.html",
@@ -46,9 +46,20 @@ self.addEventListener("fetch", (event) => {
     );
   else if (files.includes(url.pathname))
     event.respondWith(
-      caches
-        .match(event.request)
-        .then((cached) => cached || fetch(event.request)),
+      (async () => {
+        const client = event.clientId
+          ? await self.clients.get(event.clientId)
+          : null;
+        const player =
+          client && new URL(client.url).pathname.startsWith("/tv/");
+        if (!player) {
+          try {
+            const response = await fetch(event.request);
+            if (response.ok) return response;
+          } catch {}
+        }
+        return (await caches.match(event.request)) || fetch(event.request);
+      })(),
     );
   else if (url.pathname.startsWith("/media/"))
     event.respondWith(
