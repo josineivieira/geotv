@@ -1,7 +1,11 @@
 import { request, toast } from "./api.js";
 import { uploadFile } from "./uploads.js";
 import { mountPresentationEditor } from "./presentation-editor.js";
-import { storyDefaults, storyFrames } from "/shared/client-story.js";
+import {
+  storyCards,
+  storyDefaults,
+  storyFrames,
+} from "/shared/client-story.js";
 import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
 import { salesDefaults, salesFrames } from "/shared/sales-show.js";
 import { alertDefaults, alertFrames } from "/shared/process-alerts.js";
@@ -35,7 +39,7 @@ export function openEditor(original, state, onSaved) {
           ? 3
           : content.template === "hydrology"
             ? 6
-            : 13;
+            : storyCards.length + 2;
   if (animated) {
     content.fields = {
       ...(content.template === "monthly-results"

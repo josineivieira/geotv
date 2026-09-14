@@ -249,21 +249,29 @@ export function renderSlide(content) {
   if (t.kind === "monthly-results") return renderMonthlyResults(content, e);
   if (t.kind === "client-story") {
     const values = { ...storyDefaults, ...f };
-    const index = Math.max(0, Math.min(12, Number(values.storyScene) || 0));
+    const index = Math.max(
+      0,
+      Math.min(
+        storyCards.length + 1,
+        Math.floor(Number(values.storyScene) || 0),
+      ),
+    );
     const card = storyCards[index];
     const title = card
       ? card[1]
-      : index === 11
+      : index === storyCards.length
         ? "Top 5 melhores"
         : "Top 5 ofensores";
-    const rows = String(values[index === 11 ? "best" : "offenders"])
+    const rows = String(
+      values[index === storyCards.length ? "best" : "offenders"],
+    )
       .split("\n")
       .filter((line) => line.trim())
       .slice(0, 5);
     const main = card
       ? `<div class="story-symbol">${e(card[5])}</div><h1>${e(title)}</h1><strong class="story-value" data-story-value="${e(values[card[0]])}">${e(values[card[0]])}</strong><p class="story-caption">${e(values[card[0] + "Caption"])}</p>`
-      : `<h1>${e(title)}</h1><table><thead><tr>${(index === 11 ? ["Cliente", "CNTRs"] : ["Cliente", "Pico", "Atual", "Gap"]).map((label) => `<th>${label}</th>`).join("")}</tr></thead><tbody>${rows.map((line, i) => `<tr style="--row:${i}">${Array.from({ length: index === 11 ? 2 : 4 }, (_, j) => `<td>${e(line.split(";")[j] || "—")}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-    return `<article class="tv-slide story-slide"><header><img class="story-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>${e(values.period)}</span></header><div class="story-section">${e(card?.[4] || "Ranking de clientes")} · ${index + 1} / 13</div><section class="story-stage">${main}</section><footer><span>geo<b>tv</b> · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "INDICADORES DE CLIENTES"}</span><span>Conteúdo que conecta. Informação que movimenta.</span></footer></article>`;
+      : `<h1>${e(title)}</h1><table><thead><tr>${(index === storyCards.length ? ["Cliente", "CNTRs"] : ["Cliente", "Pico", "Atual", "Gap"]).map((label) => `<th>${label}</th>`).join("")}</tr></thead><tbody>${rows.map((line, i) => `<tr style="--row:${i}">${Array.from({ length: index === storyCards.length ? 2 : 4 }, (_, j) => `<td>${e(line.split(";")[j] || "—")}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    return `<article class="tv-slide story-slide"><header><img class="story-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>${e(values.period)}</span></header><div class="story-section">${e(card?.[4] || "Ranking de clientes")} · ${index + 1} / ${storyCards.length + 2}</div><section class="story-stage">${main}</section><footer><span>geo<b>tv</b> · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "INDICADORES DE CLIENTES"}</span><span>Conteúdo que conecta. Informação que movimenta.</span></footer></article>`;
   }
   const numbers = String(f.monthly || "")
     .split(",")

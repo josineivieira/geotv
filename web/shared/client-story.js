@@ -1,37 +1,5 @@
 export const storyCards = [
   [
-    "top10",
-    "Top 10 Clientes",
-    "43,0%",
-    "Os 10 maiores clientes representam 43% do volume do trimestre.",
-    "Concentração",
-    "★",
-  ],
-  [
-    "pareto",
-    "Clientes 80/20",
-    "40",
-    "Número de clientes necessários para representar 80% do volume.",
-    "Concentração",
-    "◆",
-  ],
-  [
-    "share",
-    "% Clientes 80/20",
-    "25,0%",
-    "Parcela dos clientes ativos responsável por 80% do volume.",
-    "Concentração",
-    "◔",
-  ],
-  [
-    "active",
-    "Clientes Ativos",
-    "160",
-    "Total de clientes ativos no trimestre.",
-    "Concentração",
-    "●",
-  ],
-  [
     "new",
     "Novo",
     "40",
@@ -101,10 +69,10 @@ export const storyDefaults = {
   ),
 };
 export function storyFrames(content) {
-  return Array.from({ length: 13 }, (_, index) => ({
+  return Array.from({ length: storyCards.length + 2 }, (_, index) => ({
     ...content,
     id: `${content.id || "preview"}:story:${index}`,
-    duration: content.duration / 13,
+    duration: content.duration / (storyCards.length + 2),
     transition: "fade",
     fields: { ...storyDefaults, ...content.fields, storyScene: index },
   }));
