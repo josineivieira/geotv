@@ -43,10 +43,10 @@ export async function validateContent(input) {
     fail(400, "Use pelo menos 15 segundos para as 3 telas da campanha.");
   if (c.template === "hydrology" && c.duration < 30)
     fail(400, "Use pelo menos 30 segundos para as 6 telas do boletim.");
-  if (c.template === "client-story" && c.duration < 45)
+  if (c.template === "client-story" && c.duration < 50)
     fail(
       400,
-      "Use pelo menos 45 segundos para as 9 telas (5 segundos por tela).",
+      "Use pelo menos 50 segundos para as 10 telas (5 segundos por tela).",
     );
   if (!Number.isFinite(c.duration) || c.duration < 5 || c.duration > 3600)
     fail(400, "Duração deve ser entre 5 e 3600 segundos.");

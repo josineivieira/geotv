@@ -1781,3 +1781,107 @@
     animation: none !important;
   }
 }
+.clients-cover {
+  padding: 3cqw 4cqw;
+  background:
+    radial-gradient(ellipse at 90% 30%, #65578c, transparent 65%), #282337;
+  color: #fff;
+  border-top: 0.4cqw solid #9ddcc0;
+}
+.clients-cover header,
+.clients-cover footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2cqw;
+}
+.clients-cover header img {
+  width: 20cqw;
+  height: 6cqw;
+  object-fit: contain;
+  object-position: left;
+}
+.clients-cover header > span {
+  font-size: 1.6cqw;
+  color: #ddd5ee;
+}
+.clients-cover section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 75%;
+  animation: story-enter 1s both;
+}
+.clients-cover-kicker {
+  color: #9ddcc0;
+  font-size: 1.35cqw;
+  letter-spacing: 0.24cqw;
+  font-weight: 700;
+}
+.clients-cover h1 {
+  font-size: 6.4cqw;
+  line-height: 1.04;
+  letter-spacing: -0.2cqw;
+  margin: 1.5cqw 0;
+  overflow-wrap: anywhere;
+}
+.clients-cover p {
+  font-size: 2cqw;
+  line-height: 1.4;
+  color: #e0d9ed;
+  max-width: 55cqw;
+}
+.clients-cover-topics {
+  display: flex;
+  gap: 2cqw;
+  margin-top: 2.5cqw;
+  font-size: 1.2cqw;
+  letter-spacing: 0.15cqw;
+}
+.clients-cover-topics span {
+  border-top: 0.2cqw solid #9ddcc0;
+  padding-top: 0.8cqw;
+}
+.clients-cover footer {
+  font-size: 1.15cqw;
+  color: #c9bedc;
+}
+.clients-cover-arrows {
+  position: absolute;
+  inset: 12cqw -7cqw 8cqw auto;
+  display: flex;
+  align-items: center;
+  z-index: -1;
+}
+.clients-cover-arrows i {
+  width: 12cqw;
+  height: 24cqw;
+  margin-left: -4cqw;
+  background: #9ddcc020;
+  clip-path: polygon(0 0, 35% 0, 100% 50%, 35% 100%, 0 100%, 65% 50%);
+  animation: clients-cover-drift 6s ease-in-out infinite alternate;
+}
+.clients-cover-arrows i:nth-child(2) {
+  background: #b7a9e035;
+  animation-delay: -2s;
+}
+.clients-cover-arrows i:nth-child(3) {
+  animation-delay: -4s;
+}
+@keyframes clients-cover-drift {
+  from {
+    transform: translateX(-1cqw);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateX(1cqw);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clients-cover * {
+    animation: none !important;
+  }
+}

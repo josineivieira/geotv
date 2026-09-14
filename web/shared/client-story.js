@@ -57,6 +57,8 @@ export const storyCards = [
   ],
 ];
 export const storyDefaults = {
+  coverTitle: "Clientes que movem a Geo",
+  coverMessage: "Conexões que crescem. Parcerias que nos levam além.",
   period: "3º trimestre de 2026",
   best: "C M DISTRIBUIDORA;119\nNOVA ERA;83\nAGRO SUL CATARINENSE;67\nSUPERMERCADOS DB;61\nBEBIDAS GRASSI;54",
   offenders:
@@ -69,11 +71,12 @@ export const storyDefaults = {
   ),
 };
 export function storyFrames(content) {
-  return Array.from({ length: storyCards.length + 2 }, (_, index) => ({
+  return Array.from({ length: storyCards.length + 3 }, (_, index) => ({
     ...content,
     id: `${content.id || "preview"}:story:${index}`,
-    duration: content.duration / (storyCards.length + 2),
+    duration:
+      Math.max(50, Number(content.duration) || 50) / (storyCards.length + 3),
     transition: "fade",
-    fields: { ...storyDefaults, ...content.fields, storyScene: index },
+    fields: { ...storyDefaults, ...content.fields, storyScene: index - 1 },
   }));
 }

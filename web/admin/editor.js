@@ -39,7 +39,7 @@ export function openEditor(original, state, onSaved) {
           ? 3
           : content.template === "hydrology"
             ? 6
-            : storyCards.length + 2;
+            : storyCards.length + 3;
   if (animated) {
     content.fields = {
       ...(content.template === "monthly-results"
