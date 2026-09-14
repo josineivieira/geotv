@@ -235,6 +235,31 @@ test(
       ),
       "4567",
     );
+    await evaluate(
+      `document.querySelector('[data-page="Templates"]').click();document.querySelector('[data-id="goals"]').click()`,
+    );
+    await waitFor('!!document.querySelector("[name=savedContent]")');
+    await evaluate(`document.querySelector('#dialog-form').requestSubmit()`);
+    await waitFor('!!document.querySelector("[name=field_annualCurrent]")');
+    assert.equal(
+      await evaluate(
+        `document.querySelector('[name=field_annualCurrent]').value`,
+      ),
+      "4567",
+      "reabrir pela galeria permite editar o conteúdo salvo",
+    );
+    await evaluate(
+      `document.querySelector('#close-editor').click();document.querySelector('[data-id="goals"]').click();document.querySelector('#create-from-template').click()`,
+    );
+    await waitFor('!!document.querySelector("[name=field_annualCurrent]")');
+    assert.equal(
+      await evaluate(
+        `document.querySelector('[name=field_annualCurrent]').value`,
+      ),
+      "4000",
+      "criar novo continua disponível explicitamente",
+    );
+    await evaluate(`document.querySelector('#close-editor').click()`);
     await evaluate(`document.querySelector('[data-action=new]').click()`);
     await waitFor('!!document.querySelector("[data-action=template]")');
     await evaluate(`document.querySelector('[data-id=sales]').click()`);
@@ -323,7 +348,7 @@ test(
     );
     await shot("admin-tablet");
     await evaluate(
-      `document.querySelector('[data-page="Templates"]').click();document.querySelector('[data-id="presentation"]').click()`,
+      `document.querySelector('[data-page="Templates"]').click();document.querySelector('[data-id="presentation"]').click();document.querySelector('#create-from-template')?.click()`,
     );
     await waitFor('!!document.querySelector("#presentation-images")');
     const { root } = await command("DOM.getDocument");
@@ -395,7 +420,7 @@ test(
       [pptxPath, "PowerPoint"],
     ]) {
       await evaluate(
-        `document.querySelector('[data-page="Templates"]').click();document.querySelector('[data-id="presentation"]').click()`,
+        `document.querySelector('[data-page="Templates"]').click();document.querySelector('[data-id="presentation"]').click();document.querySelector('#create-from-template')?.click()`,
       );
       await waitFor('!!document.querySelector("#presentation-document")');
       const tree = await command("DOM.getDocument");

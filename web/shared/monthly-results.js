@@ -13,10 +13,16 @@ export const monthlyResultDefaults = {
   reference: "Atualizado em 11/09/2026 · setembro parcial",
   priorYear: "2025",
   currentYear: "2026",
+  comparisonMonths: 8,
   priorValues: "444,454,418,402,439,443,404,360,484",
   currentValues: "419,417,450,379,475,456,651,563,191",
 };
 export const monthlyResultFields = [
+  [
+    "comparisonMonths",
+    "Comparar meses completos até (1 = Jan, 8 = Ago, 9 = Set)",
+    "number",
+  ],
   ["reference", "Referência / atualização"],
   ["priorYear", "Ano de comparação"],
   ["currentYear", "Ano atual"],
@@ -32,6 +38,77 @@ export const monthlyResultFields = [
   ],
 ];
 const fmt = (n) => n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+export function monthlyResultFrames(content) {
+  return Array.from({ length: 3 }, (_, scene) => ({
+    ...content,
+    id: `${content.id || "preview"}:results:${scene}`,
+    duration: Math.max(15, Number(content.duration) || 30) / 3,
+    transition: "fade",
+    fields: { ...content.fields, resultScene: scene },
+  }));
+}
+export function resultGrowth(fields = {}) {
+  const d = monthlyResultData(fields);
+  const months = Math.max(
+    1,
+    Math.min(9, Math.floor(Number(d.f.comparisonMonths) || 8)),
+  );
+  const pairs = d.current
+    .slice(0, months)
+    .map((value, i) => ({
+      value,
+      prior: d.prior[i],
+      month: resultMonths[i],
+      index: i,
+    }));
+  const valid = pairs.every((p) => p.value !== null && p.prior !== null);
+  const current = valid ? pairs.reduce((n, p) => n + p.value, 0) : null;
+  const prior = valid ? pairs.reduce((n, p) => n + p.prior, 0) : null;
+  const delta =
+    valid && Number.isFinite(current - prior) ? current - prior : null;
+  const percent =
+    delta !== null && prior > 0 && Number.isFinite((delta / prior) * 100)
+      ? (delta / prior) * 100
+      : null;
+  const winners = pairs.filter(
+    (p) => p.value !== null && p.prior !== null && p.value > p.prior,
+  );
+  const best = winners.reduce(
+    (best, p) =>
+      !best || p.value - p.prior > best.value - best.prior ? p : best,
+    null,
+  );
+  return {
+    ...d,
+    months,
+    period:
+      months === 1 ? "JAN" : `JAN–${resultMonths[months - 1].toUpperCase()}`,
+    current,
+    prior,
+    delta,
+    percent,
+    winners: valid ? winners.length : null,
+    best: valid ? best : null,
+  };
+}
+function renderGrowth(content, e, scene) {
+  const g = resultGrowth(content.fields);
+  const display = (n) => (n === null ? "—" : fmt(n));
+  const signed = (n) => (n === null ? "—" : `${n > 0 ? "+" : ""}${fmt(n)}`);
+  const headline =
+    g.delta === null
+      ? "Complete os dados do período"
+      : g.delta > 0
+        ? "Crescemos juntos."
+        : g.delta < 0
+          ? "Hora de recuperar o ritmo."
+          : "No mesmo ritmo.";
+  const body =
+    scene === 1
+      ? `<div class="growth-hero"><span>EVOLUÇÃO SOBRE ${e(g.f.priorYear)}</span><strong>${signed(g.percent)}${g.percent === null ? "" : "%"}</strong><h1>${headline}</h1><p>${signed(g.delta)} em volume no mesmo período</p></div><div class="growth-comparison"><div><span>${e(g.f.priorYear)} · ${g.period}</span><strong>${display(g.prior)}</strong></div><span class="growth-arrow">→</span><div><span>${e(g.f.currentYear)} · ${g.period}</span><strong>${display(g.current)}</strong></div></div>`
+      : `<h1 class="growth-title">Os meses que fizeram a diferença</h1><div class="growth-highlights"><div><span>MESES COM CRESCIMENTO</span><strong>${display(g.winners)}<small> / ${g.months}</small></strong><p>Acima do mesmo mês de ${e(g.f.priorYear)}</p></div><div><span>MAIOR GANHO EM VOLUME</span><strong>${g.best ? g.best.month.toUpperCase() : "—"}</strong><p>${g.best ? `${signed(g.best.value - g.best.prior)} · ${display(g.best.prior)} → ${display(g.best.value)}` : "Nenhum mês com alta identificada"}</p></div></div><div class="growth-takeaway">${g.delta === null ? "Preencha todos os meses para comparar." : `${signed(g.delta)} no acumulado · ${g.period} de ${e(g.f.currentYear)} × ${e(g.f.priorYear)}`}</div>`;
+  return `<article class="tv-slide monthly-results growth-slide ${g.delta < 0 ? "growth-down" : ""}"><header class="results-header"><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>MESMO PERÍODO · ${g.period} · ${scene + 1} / 3</span></header><section class="growth-stage">${body}</section><footer class="results-footer"><span>${g.months < 9 ? `Meses após ${resultMonths[g.months - 1]} fora desta comparação` : "Comparação até setembro"}${content.demo ? " · DEMONSTRAÇÃO" : ""}</span><span>${e(g.f.reference)}</span></footer></article>`;
+}
 export function monthlyResultData(fields = {}) {
   const f = { ...monthlyResultDefaults, ...fields };
   const parse = (value) => {
@@ -70,6 +147,11 @@ export function monthlyResultData(fields = {}) {
   };
 }
 export function renderMonthlyResults(content, e) {
+  const scene = Math.max(
+    0,
+    Math.min(2, Math.floor(Number(content.fields?.resultScene) || 0)),
+  );
+  if (scene) return renderGrowth(content, e, scene);
   const d = monthlyResultData(content.fields);
   const display = (n) => (n === null ? "—" : fmt(n));
   const ceiling = Math.max(1, ...d.prior, ...d.current);

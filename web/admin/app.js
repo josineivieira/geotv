@@ -239,6 +239,39 @@ async function action(name, node) {
         },
       );
     case "template":
+      if (can("edit")) {
+        const saved = state.contents.filter((item) => item.template === id);
+        if (saved.length) {
+          showModal(
+            "Abrir conteúdo salvo",
+            `<p>Você já tem conteúdos com este modelo. Escolha qual deseja editar.</p><label>Conteúdo<select name="savedContent">${saved.map((item) => `<option value="${e(item.id)}">${e(item.title)} · ${e(item.status)}</option>`).join("")}</select></label><button class="primary" type="submit">Editar conteúdo salvo</button> <button type="button" id="create-from-template">Criar novo conteúdo</button>`,
+            (data) => {
+              const existing = saved.find(
+                (item) => item.id === data.get("savedContent"),
+              );
+              closeModal();
+              openEditor(existing, state, refresh);
+            },
+          );
+          modal.querySelector("#create-from-template").onclick = () => {
+            closeModal();
+            openEditor(
+              {
+                template: id,
+                title: templateById(id).name,
+                duration: state.settings.duration,
+                category: templateById(id).category,
+                status: "Rascunho",
+                active: true,
+                fields: { autoSort: true },
+              },
+              state,
+              refresh,
+            );
+          };
+          return;
+        }
+      }
       if (can("edit"))
         openEditor(
           {

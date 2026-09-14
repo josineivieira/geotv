@@ -1,7 +1,39 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monthlyResultData } from "../web/shared/monthly-results.js";
+import {
+  monthlyResultData,
+  resultGrowth,
+  monthlyResultFrames,
+} from "../web/shared/monthly-results.js";
 import { renderSlide } from "../web/shared/templates.js";
+test("crescimento: compara meses completos e divide em três telas legíveis", () => {
+  const growth = resultGrowth();
+  assert.equal(growth.current, 3810);
+  assert.equal(growth.prior, 3364);
+  assert.equal(growth.delta, 446);
+  assert.equal(growth.winners, 5);
+  assert.equal(growth.best.month, "Jul");
+  assert.equal(resultGrowth({ comparisonMonths: 9 }).delta, 153);
+  assert.equal(resultGrowth({ currentValues: "" }).percent, null);
+  assert.equal(
+    resultGrowth({ priorValues: "0,0,0,0,0,0,0,0,0" }).percent,
+    null,
+  );
+  const frames = monthlyResultFrames({
+    id: "test",
+    template: "monthly-results",
+    duration: 30,
+    fields: {},
+  });
+  assert.equal(frames.length, 3);
+  assert.equal(
+    frames.reduce((sum, f) => sum + f.duration, 0),
+    30,
+  );
+  assert.equal(new Set(frames.map((f) => f.id)).size, 3);
+  assert.match(renderSlide(frames[1]), /13,26%/);
+  assert.match(renderSlide(frames[2]), /MESES COM CRESCIMENTO/);
+});
 
 test("resultados mensais: calcula acumulado somente de janeiro a setembro", () => {
   const d = monthlyResultData();

@@ -6,7 +6,10 @@ import { hydroDefaults, hydroFrames } from "/shared/hydrology.js";
 import { salesDefaults, salesFrames } from "/shared/sales-show.js";
 import { alertDefaults, alertFrames } from "/shared/process-alerts.js";
 import { goalDefaults } from "/shared/goals.js";
-import { monthlyResultDefaults } from "/shared/monthly-results.js";
+import {
+  monthlyResultDefaults,
+  monthlyResultFrames,
+} from "/shared/monthly-results.js";
 import {
   templateById,
   renderSlide,
@@ -17,28 +20,33 @@ export function openEditor(original, state, onSaved) {
     template = templateById(content.template),
     dialog = document.querySelector("#modal");
   const animated = [
+    "monthly-results",
     "client-story",
     "hydrology",
     "sales-show",
     "process-alerts",
   ].includes(content.template);
   const sceneCount =
-    content.template === "process-alerts"
-      ? 5
-      : content.template === "sales-show"
-        ? 3
-        : content.template === "hydrology"
-          ? 6
-          : 13;
+    content.template === "monthly-results"
+      ? 3
+      : content.template === "process-alerts"
+        ? 5
+        : content.template === "sales-show"
+          ? 3
+          : content.template === "hydrology"
+            ? 6
+            : 13;
   if (animated) {
     content.fields = {
-      ...(content.template === "process-alerts"
-        ? alertDefaults
-        : content.template === "sales-show"
-          ? salesDefaults
-          : content.template === "hydrology"
-            ? hydroDefaults
-            : storyDefaults),
+      ...(content.template === "monthly-results"
+        ? monthlyResultDefaults
+        : content.template === "process-alerts"
+          ? alertDefaults
+          : content.template === "sales-show"
+            ? salesDefaults
+            : content.template === "hydrology"
+              ? hydroDefaults
+              : storyDefaults),
       ...content.fields,
     };
     if (!content.id) content.duration = sceneCount * 10;
@@ -124,13 +132,15 @@ export function openEditor(original, state, onSaved) {
       read();
       scene = 0;
       const frames =
-        content.template === "process-alerts"
-          ? alertFrames(content)
-          : content.template === "sales-show"
-            ? salesFrames(content)
-            : content.template === "hydrology"
-              ? hydroFrames(content)
-              : storyFrames(content);
+        content.template === "monthly-results"
+          ? monthlyResultFrames(content)
+          : content.template === "process-alerts"
+            ? alertFrames(content)
+            : content.template === "sales-show"
+              ? salesFrames(content)
+              : content.template === "hydrology"
+                ? hydroFrames(content)
+                : storyFrames(content);
       const draw = () => {
         dialog.querySelector("#live-preview").innerHTML = renderSlide(
           frames[scene++ % frames.length],

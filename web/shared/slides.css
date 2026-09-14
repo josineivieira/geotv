@@ -1672,3 +1672,112 @@
     animation: none !important;
   }
 }
+.growth-slide {
+  --growth-accent: #9ddcc0;
+}
+.growth-down {
+  --growth-accent: #ffc4ab;
+}
+.growth-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2cqw;
+  min-height: 0;
+}
+.growth-hero {
+  text-align: center;
+  animation: story-enter 0.9s both;
+}
+.growth-hero > span,
+.growth-highlights > div > span {
+  font-size: 1.6cqw;
+  letter-spacing: 0.15cqw;
+  color: #e0d9ed;
+}
+.growth-hero > strong {
+  display: block;
+  font-size: 10cqw;
+  line-height: 1.1;
+  color: var(--growth-accent);
+  font-variant-numeric: tabular-nums;
+}
+.growth-hero h1 {
+  font-size: 3.7cqw;
+  margin: 0.6cqw 0;
+}
+.growth-hero p {
+  font-size: 2.3cqw;
+}
+.growth-comparison {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4cqw;
+}
+.growth-comparison > div {
+  min-width: 24cqw;
+  padding: 1.4cqw 3cqw;
+  border: 1px solid #bcb0eb50;
+  border-radius: 1cqw;
+  background: #ffffff07;
+  text-align: center;
+  animation: story-enter 1s 0.5s both;
+}
+.growth-comparison span {
+  font-size: 1.7cqw;
+}
+.growth-comparison strong {
+  display: block;
+  font-size: 4cqw;
+  color: var(--growth-accent);
+}
+.growth-comparison .growth-arrow {
+  font-size: 4cqw;
+  color: #9ddcc0;
+}
+.growth-title {
+  font-size: 3.7cqw;
+  text-align: center;
+}
+.growth-highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2cqw;
+  margin: 1.4cqw 0;
+}
+.growth-highlights > div {
+  padding: 3cqw 2cqw;
+  border: 1px solid #9ddcc050;
+  border-radius: 1.3cqw;
+  background: linear-gradient(145deg, #9ddcc015, #8176b515);
+  text-align: center;
+  animation: story-enter 1s both;
+}
+.growth-highlights > div:last-child {
+  animation-delay: 0.4s;
+}
+.growth-highlights strong {
+  display: block;
+  font-size: 8cqw;
+  color: var(--growth-accent);
+  margin: 1cqw 0;
+}
+.growth-highlights small {
+  font-size: 3cqw;
+  color: #ddd5ee;
+}
+.growth-highlights p {
+  font-size: 1.8cqw;
+}
+.growth-takeaway {
+  text-align: center;
+  font-size: 2.2cqw;
+  color: #e0d9ed;
+}
+@media (prefers-reduced-motion: reduce) {
+  .growth-slide * {
+    animation: none !important;
+  }
+}
