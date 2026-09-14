@@ -62,6 +62,28 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
   assert.equal(login.response.status, 200);
   cookie = login.response.headers.get("set-cookie").split(";")[0];
   assert.ok(login.response.headers.get("set-cookie").includes("HttpOnly"));
+  assert.match(login.response.headers.get("set-cookie"), /Max-Age=28800/);
+  const persistent = await call("/login", "POST", {
+    email: "test@geotv.local",
+    password: "Test-password-12345",
+    remember: true,
+  });
+  assert.match(
+    persistent.response.headers.get("set-cookie"),
+    /Max-Age=31536000/,
+  );
+  const persistentCookie = persistent.response.headers
+    .get("set-cookie")
+    .split(";")[0];
+  assert.equal(
+    (await call("/me", "GET", undefined, persistentCookie)).response.status,
+    200,
+  );
+  await call("/logout", "POST", {}, persistentCookie);
+  assert.equal(
+    (await call("/me", "GET", undefined, persistentCookie)).response.status,
+    401,
+  );
   const device = (
     await call("/devices", "POST", { name: "TV Teste", group: "Manaus" })
   ).data;

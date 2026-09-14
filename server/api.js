@@ -76,13 +76,14 @@ export async function api(req, res, url) {
     if (!user || !verifyPassword(body.password, user.password))
       fail(401, "E-mail ou senha incorretos.");
     const token = secret();
+    const sessionSeconds = body.remember === true ? 365 * 24 * 3600 : 8 * 3600;
     await db.prepare("DELETE FROM sessions WHERE expires<?").run(Date.now());
     await db
       .prepare("INSERT INTO sessions VALUES(?,?,?)")
-      .run(digest(token), user.id, Date.now() + 8 * 3600000);
+      .run(digest(token), user.id, Date.now() + sessionSeconds * 1000);
     res.setHeader(
       "Set-Cookie",
-      `geotv_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800${process.env.COOKIE_SECURE === "true" ? "; Secure" : ""}`,
+      `geotv_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${sessionSeconds}${process.env.COOKIE_SECURE === "true" ? "; Secure" : ""}`,
     );
     await audit(user, "Entrou no sistema", user.id);
     return json(res, 200, {

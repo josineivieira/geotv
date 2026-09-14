@@ -655,17 +655,16 @@ function login() {
   state = null;
   page = "Dashboard";
   closeModal();
-  app.innerHTML = `<div class="login-page"><section class="login-story"><a class="brand">geo<span>tv</span><i></i></a><img class="login-company-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><div class="login-copy"><div class="eyebrow">SEU CANAL INTERNO DIGITAL</div><h1>Informação que<br>conecta.<br><em>Resultados que<br>movimentam.</em></h1><p>Uma plataforma. Todas as suas TVs.<br>A comunicação da sua empresa em sintonia.</p></div><span>GEOTV · CONECTANDO PESSOAS</span></section><section class="login-form"><form id="login"><span class="eyebrow">BEM-VINDO AO GEOTV</span><h2>Seu canal começa aqui.</h2><p>Entre para gerenciar conteúdos e conectar suas TVs.</p><label>E-mail<input name="email" type="email" required autocomplete="username" placeholder="seu.email@empresa.com.br"></label><label>Senha<input name="password" type="password" required autocomplete="current-password" placeholder="Sua senha"></label><p id="login-error" role="alert"></p><button class="primary">Entrar no GeoTV ↗</button><small>Acesso exclusivo para usuários autorizados.</small></form></section></div>`;
+  app.innerHTML = `<div class="login-page"><section class="login-story"><a class="brand">geo<span>tv</span><i></i></a><img class="login-company-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><div class="login-copy"><div class="eyebrow">SEU CANAL INTERNO DIGITAL</div><h1>Informação que<br>conecta.<br><em>Resultados que<br>movimentam.</em></h1><p>Uma plataforma. Todas as suas TVs.<br>A comunicação da sua empresa em sintonia.</p></div><span>GEOTV · CONECTANDO PESSOAS</span></section><section class="login-form"><form id="login" autocomplete="on"><span class="eyebrow">BEM-VINDO AO GEOTV</span><h2>Seu canal começa aqui.</h2><p>Entre para gerenciar conteúdos e conectar suas TVs.</p><label>E-mail<input name="email" type="email" required autocomplete="username" placeholder="seu.email@empresa.com.br"></label><label>Senha<input name="password" type="password" required autocomplete="current-password" placeholder="Sua senha"></label><label class="check-label"><input type="checkbox" name="remember" checked> Manter conectado neste dispositivo</label><small>Para salvar sua senha, aceite a opção “Salvar senha” oferecida pelo navegador.</small><p id="login-error" role="alert"></p><button class="primary">Entrar no GeoTV ↗</button><small>Acesso exclusivo para usuários autorizados.</small></form></section></div>`;
   document.querySelector("#login").onsubmit = async (event) => {
     event.preventDefault();
     const b = event.target.querySelector("button");
     b.disabled = true;
     try {
-      await request(
-        "/login",
-        "POST",
-        Object.fromEntries(new FormData(event.target)),
-      );
+      await request("/login", "POST", {
+        ...Object.fromEntries(new FormData(event.target)),
+        remember: new FormData(event.target).has("remember"),
+      });
       await refresh();
     } catch (error) {
       document.querySelector("#login-error").textContent = error.message;
