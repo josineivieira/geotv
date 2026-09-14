@@ -90,7 +90,10 @@ export function openEditor(original, state, onSaved) {
   document.querySelector("#close-editor").onclick = close;
   dialog.addEventListener(
     "close",
-    () => dialog.classList.remove("editor-dialog"),
+    () => {
+      // A queued close event from the template picker can arrive after reopen.
+      if (!dialog.open) dialog.classList.remove("editor-dialog");
+    },
     { once: true },
   );
   const form = document.querySelector("#editor-form");

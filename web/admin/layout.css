@@ -634,12 +634,13 @@ main {
   padding: 0 16px;
 }
 .editor-dialog {
-  width: 1280px !important;
+  width: min(1760px, 94vw) !important;
+  max-width: 94vw;
   padding: 25px !important;
 }
 .editor-grid {
   display: grid;
-  grid-template-columns: 330px 1fr;
+  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 2fr);
   gap: 30px;
 }
 .editor-fields {
@@ -656,6 +657,7 @@ main {
   margin-top: 0;
 }
 .editor-preview {
+  min-width: 0;
   background: #f2f5ef;
   padding: 25px;
   border-radius: 8px;
@@ -677,6 +679,9 @@ main {
   border-top: 1px solid #dee5d9;
   margin-top: 40px;
   padding-top: 25px;
+}
+.editor-dialog .editor-tip {
+  display: none;
 }
 .editor-tip strong {
   font-size: 13px;

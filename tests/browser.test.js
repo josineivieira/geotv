@@ -241,6 +241,25 @@ test(
     await waitFor('!!document.querySelector("[name=savedContent]")');
     await evaluate(`document.querySelector('#dialog-form').requestSubmit()`);
     await waitFor('!!document.querySelector("[name=field_annualCurrent]")');
+    await delay(100);
+    assert.ok(
+      await evaluate(
+        `document.querySelector('#modal').classList.contains('editor-dialog')`,
+      ),
+      "fechamento do seletor não encolhe o editor reaberto",
+    );
+    assert.ok(
+      await evaluate(
+        `document.querySelector('#modal').getBoundingClientRect().width > innerWidth * 0.85`,
+      ),
+      "editor aproveita a largura disponível",
+    );
+    assert.ok(
+      await evaluate(
+        `document.querySelector('#live-preview').getBoundingClientRect().width > 600`,
+      ),
+      "preview tem largura legível no desktop",
+    );
     assert.equal(
       await evaluate(
         `document.querySelector('[name=field_annualCurrent]').value`,
@@ -260,6 +279,7 @@ test(
       "criar novo continua disponível explicitamente",
     );
     await evaluate(`document.querySelector('#close-editor').click()`);
+    if (process.env.GEOTV_TEST_EDITOR_ONLY === "1") return;
     await evaluate(`document.querySelector('[data-action=new]').click()`);
     await waitFor('!!document.querySelector("[data-action=template]")');
     await evaluate(`document.querySelector('[data-id=sales]').click()`);
