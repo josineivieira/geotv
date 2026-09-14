@@ -6,6 +6,7 @@ import {
   escapeHtml as e,
 } from "/shared/templates.js";
 import { eligible } from "/shared/schedule.js";
+import { presentationFrames } from "/shared/presentation.js";
 import { openEditor } from "./editor.js";
 import { createViews } from "./views.js";
 import { showChannels } from "./channels.js";
@@ -290,12 +291,36 @@ async function action(name, node) {
     case "edit":
       openEditor(c, state, refresh);
       return;
-    case "preview":
+    case "preview": {
+      const frames = presentationFrames(c);
       showModal(
         "Visualizar como ficará na TV",
-        `<div class="large-preview">${renderSlide(c)}</div>`,
+        `<div class="large-preview" id="sequence-preview">${renderSlide(frames[0])}</div><p id="sequence-position">Tela 1 de ${frames.length}</p>`,
       );
+      if (frames.length > 1) {
+        let scene = 0,
+          timer;
+        const preview = modal.querySelector("#sequence-preview");
+        const position = modal.querySelector("#sequence-position");
+        const advance = () => {
+          timer = setTimeout(
+            () => {
+              if (!preview.isConnected || !modal.open) return;
+              scene = (scene + 1) % frames.length;
+              preview.innerHTML = renderSlide(frames[scene]);
+              position.textContent = `Tela ${scene + 1} de ${frames.length}`;
+              advance();
+            },
+            Math.max(5, Number(frames[scene].duration) || 5) * 1000,
+          );
+        };
+        advance();
+        modal.addEventListener("close", () => clearTimeout(timer), {
+          once: true,
+        });
+      }
       return;
+    }
     case "duplicate": {
       const { id: oldId, ...copy } = c;
       await request("/contents", "POST", {

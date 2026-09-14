@@ -2,6 +2,63 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
+import { presentationFrames } from "../web/shared/presentation.js";
+
+test("canal percorre as três telas de resultados antes do próximo conteúdo", async () => {
+  const source = (
+    await readFile(new URL("../web/player/watch.js", import.meta.url), "utf8")
+  ).replace(/^import .*;\r?\n/gm, "");
+  const shown = [];
+  const context = vm.createContext({
+    location: { pathname: "/watch/test" },
+    document: { querySelector: () => ({}), addEventListener() {} },
+    window: { addEventListener() {} },
+    AbortSignal,
+    Date,
+    setInterval: () => 1,
+    clearInterval() {},
+    presentationFrames,
+    eligible: () => true,
+    createFramePresenter: () => ({
+      cancel() {},
+      preload() {},
+      show(c, effect, done) {
+        shown.push(c.id);
+        done();
+      },
+    }),
+    fetch: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        version: 1,
+        settings: {},
+        alerts: [],
+        contents: [
+          {
+            id: "results",
+            template: "monthly-results",
+            duration: 30,
+            fields: {},
+          },
+          { id: "next", template: "notice", duration: 10, fields: {} },
+        ],
+      }),
+    }),
+  });
+  vm.runInContext(source, context);
+  await new Promise((resolve) => setImmediate(resolve));
+  for (let i = 0; i < 3; i++) {
+    await vm.runInContext("sync()", context);
+    vm.runInContext("deadline = 0; tick()", context);
+  }
+  assert.deepEqual(shown, [
+    "results:results:0",
+    "results:results:1",
+    "results:results:2",
+    "next",
+  ]);
+});
 
 test("canal aberto recebe alterações sem recarregar e sem esperar a duração anterior", async () => {
   const source = (
