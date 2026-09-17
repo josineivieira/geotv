@@ -827,10 +827,23 @@
   z-index: 1;
 }
 .sales-show header img {
-  width: 12cqw;
-  height: 3.5cqw;
+  width: 14cqw;
+  height: 4cqw;
   object-fit: contain;
   object-position: left center;
+}
+.sales-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+}
+.sales-brand > span {
+  padding-left: 1.2cqw;
+  border-left: 1px solid #ffffff25;
+  color: #9ddcc0;
+  font-size: 0.85cqw;
+  font-weight: 800;
+  letter-spacing: 0.16cqw;
 }
 .sales-show header > span {
   font-size: 1.05cqw;
@@ -855,6 +868,17 @@
   z-index: -1;
   pointer-events: none;
 }
+.sales-atmosphere > img {
+  position: absolute;
+  right: -7cqw;
+  bottom: 0;
+  width: 46cqw;
+  height: 29cqw;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.8);
+  opacity: 0.035;
+  transform: rotate(-8deg);
+}
 .sales-atmosphere i {
   position: absolute;
   width: 45cqw;
@@ -865,11 +889,11 @@
   transform: rotate(-18deg);
   animation: sales-speed 4s ease-in-out infinite;
 }
-.sales-atmosphere i:nth-child(2) {
+.sales-atmosphere i:nth-of-type(2) {
   --line: 1;
   animation-delay: -1.3s;
 }
-.sales-atmosphere i:nth-child(3) {
+.sales-atmosphere i:nth-of-type(3) {
   --line: 2;
   animation-delay: -2.6s;
 }
@@ -881,6 +905,41 @@
   font-size: 20cqw;
   font-weight: 900;
   letter-spacing: -4cqw;
+}
+.sales-geo-route {
+  position: absolute;
+  left: 3.5cqw;
+  top: 50%;
+  display: grid;
+  gap: 0.7cqw;
+  transform: translateY(-50%);
+  opacity: 0.28;
+}
+.sales-geo-route b {
+  width: 1.4cqw;
+  height: 1.4cqw;
+  border-top: 0.32cqw solid #9ddcc0;
+  border-right: 0.32cqw solid #9ddcc0;
+  transform: rotate(45deg);
+  animation: sales-route 1.8s calc(var(--route, 0) * 0.2s) ease-in-out infinite;
+}
+.sales-geo-route b:nth-child(2) {
+  --route: 1;
+}
+.sales-geo-route b:nth-child(3) {
+  --route: 2;
+}
+.sales-brand-rail {
+  position: absolute;
+  right: 1cqw;
+  top: 50%;
+  z-index: 2;
+  color: #ffffff24;
+  font-size: 0.65cqw;
+  font-weight: 800;
+  letter-spacing: 0.2cqw;
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
 }
 .sales-intro,
 .sales-winner {
@@ -901,8 +960,9 @@
 .sales-launch-mark {
   width: 7cqw;
   height: 7cqw;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.4cqw;
   border: 1px solid #9ddcc070;
   border-radius: 50%;
@@ -914,6 +974,13 @@
   font-size: 4.2cqw;
   font-weight: 900;
   animation: sales-launch 0.9s cubic-bezier(0.2, 1.5, 0.5, 1) both;
+}
+.sales-launch-mark span {
+  margin-left: -0.7cqw;
+}
+.sales-launch-mark span:first-child {
+  margin-left: 0;
+  opacity: 0.55;
 }
 .sales-intro h1 {
   font-size: 7.5cqw;
@@ -1250,6 +1317,12 @@
   50% {
     opacity: 0.35;
     transform: scale(0.75);
+  }
+}
+@keyframes sales-route {
+  50% {
+    opacity: 0.25;
+    transform: translateX(0.5cqw) rotate(45deg);
   }
 }
 @keyframes sales-crown {
