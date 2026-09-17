@@ -38,21 +38,25 @@ export function renderSales(content, e) {
     rows = salesRanking(f);
   const scene = Math.max(0, Math.min(2, Number(f.salesScene) || 0));
   const points = (n) => n.toLocaleString("pt-BR");
-  const ribbons = `<div class="sales-flags" aria-hidden="true">${Array.from({ length: 12 }, (_, i) => `<i style="--flag:${i}"></i>`).join("")}</div>`;
-  const podium = rows
-    .map(
-      (row, i) =>
-        `<div class="sales-podium rank-${i + 1}" style="--rank:${i}"><span class="sales-medal">${i + 1}º</span><h2>${e(row.name)}</h2><span class="sales-star">★</span><strong>${points(row.points)} <small>pts</small></strong></div>`,
-    )
-    .join("");
+  const atmosphere = `<div class="sales-atmosphere" aria-hidden="true"><i></i><i></i><i></i><span>›››</span></div>`;
+  const podiumCard = (row, rank) =>
+    row
+      ? `<div class="sales-podium rank-${rank}" style="--rank:${rank}"><span class="sales-medal">${rank}<small>º</small></span>${rank === 1 ? '<span class="sales-crown">★</span>' : ""}<h2>${e(row.name)}</h2><strong>${points(row.points)} <small>PTS</small></strong><div class="sales-podium-base"><span>${rank}º LUGAR</span></div></div>`
+      : "";
+  const podium = [
+    podiumCard(rows[1], 2),
+    podiumCard(rows[0], 1),
+    podiumCard(rows[2], 3),
+  ].join("");
+  const lead = rows[1] ? rows[0].points - rows[1].points : rows[0]?.points;
   let body;
   if (scene === 0)
-    body = `<section class="sales-intro"><span class="sales-kicker">NOSSO TIME EM MOVIMENTO</span><h1>Acelera<br><em>Vendas</em></h1><p>${e(f.message)}</p><span class="sales-invitation">Acompanhe a classificação da campanha →</span></section>`;
+    body = `<section class="sales-intro"><div class="sales-launch-mark" aria-hidden="true"><span>↗</span></div><span class="sales-kicker">CAMPANHA COMERCIAL · NOSSO TIME EM MOVIMENTO</span><h1>ACELERA <em>VENDAS</em></h1><p>${e(f.message)}</p><div class="sales-start-line"><i></i><span>PREPARE-SE PARA O RANKING</span><i></i></div></section>`;
   else if (scene === 1)
-    body = `<section class="sales-board"><h1>Acelera Vendas</h1><div class="sales-podiums">${podium || "<p>Adicione os participantes da campanha.</p>"}</div><p class="sales-motto">${e(f.message)}</p></section>`;
+    body = `<section class="sales-board"><div class="sales-board-heading"><div><span>CLASSIFICAÇÃO ATUAL</span><h1>Quem está acelerando?</h1></div><span class="sales-live"><i></i> RANKING AO VIVO</span></div><div class="sales-podiums">${podium || "<p>Adicione os participantes da campanha.</p>"}</div>${rows[3] ? `<div class="sales-fourth"><span>4º</span><strong>${e(rows[3].name)}</strong><b>${points(rows[3].points)} PTS</b><i></i></div>` : ""}<p class="sales-motto">${e(f.message)}</p></section>`;
   else
     body = rows.length
-      ? `<section class="sales-winner"><span class="sales-kicker">1º LUGAR · ${e(f.period)}</span><span class="sales-trophy">★</span><h1>${e(rows[0].name)}</h1><strong data-story-value="${points(rows[0].points)}">${points(rows[0].points)}</strong><span class="sales-points-label">PONTOS</span><p>${e(f.message)}</p></section>`
+      ? `<section class="sales-winner"><div class="sales-winner-burst" aria-hidden="true"><i></i><i></i><i></i></div><span class="sales-kicker">LIDERANÇA DA CAMPANHA · ${e(f.period)}</span><div class="sales-winner-crown" aria-hidden="true">★</div><span class="sales-winner-label">1º LUGAR</span><h1>${e(rows[0].name)}</h1><div class="sales-winner-score"><strong data-story-value="${points(rows[0].points)}">${points(rows[0].points)}</strong><span>PONTOS</span></div>${rows[1] ? `<div class="sales-lead">NA FRENTE POR <strong>+${points(lead)}</strong> PONTOS</div>` : ""}<p>${e(f.message)}</p></section>`
       : '<section class="sales-winner"><h1>Seu time faz a diferença.</h1></section>';
-  return `<article class="tv-slide sales-show">${ribbons}<header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>${e(f.period)}</span></header>${body}<footer><span>geo<b>tv</b> · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "ACELERA VENDAS"}</span><span>${e(f.footer)}</span></footer></article>`;
+  return `<article class="tv-slide sales-show sales-scene-${scene}">${atmosphere}<header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>${e(f.period)} · ${scene + 1} / 3</span></header>${body}<footer><span>geo<b>tv</b> · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "ACELERA VENDAS"}</span><span>${e(f.footer)}</span></footer></article>`;
 }

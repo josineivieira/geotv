@@ -23,5 +23,9 @@ test("campanha animada preserva duração e destaca a maior pontuação", () => 
   );
   assert.match(renderSlide(frames[2]), /&lt;Líder&gt;/);
   assert.match(renderSlide(frames[2]), /data-story-value="50"/);
+  assert.match(renderSlide(frames[0]), /PREPARE-SE PARA O RANKING/);
+  assert.match(renderSlide(frames[1]), /Quem está acelerando\?/);
+  assert.match(renderSlide(frames[1]), /sales-podium rank-1/);
+  assert.match(renderSlide(frames[2]), /NA FRENTE POR <strong>\+30/);
   assert.doesNotMatch(renderSlide(frames[1]), /Inválido/);
 });
