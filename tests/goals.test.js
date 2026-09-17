@@ -56,10 +56,27 @@ test("metas: cria tela de celebração somente quando existe conquista", () => {
   });
   assert.equal(achieved.length, 2);
   assert.equal(achieved[0].duration, 12);
-  assert.equal(achieved[1].duration, 8);
+  assert.equal(achieved[1].duration, 12);
   assert.equal(achieved[1].fields.goalScene, "celebration");
+  assert.equal(achieved[1].fields.goalAchievement, "daily");
   assert.match(renderSlide(achieved[1]), /Parabéns, time!/);
-  assert.match(renderSlide(achieved[1]), /✓ Hoje/);
+  assert.match(renderSlide(achieved[1]), /META HOJE ATINGIDA/);
+
+  const twoAchievements = presentationFrames({
+    id: "goal-2",
+    template: "goals",
+    duration: 20,
+    fields: {
+      weeklyCurrent: 120,
+      weeklyTarget: 100,
+      dailyCurrent: 110,
+      dailyTarget: 100,
+    },
+  });
+  assert.equal(twoAchievements.length, 3);
+  assert.equal(twoAchievements[1].fields.goalAchievement, "weekly");
+  assert.equal(twoAchievements[2].fields.goalAchievement, "daily");
+  assert.match(renderSlide(twoAchievements[1]), /META SEMANAL ATINGIDA/);
 
   const pending = presentationFrames({
     template: "goals",

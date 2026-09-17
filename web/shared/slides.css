@@ -1364,41 +1364,45 @@
 }
 .goals-celebration-stage > p {
   max-width: 58cqw;
-  margin: 0.5cqw 0 1.8cqw;
+  margin: 1.4cqw 0 0;
   color: #e0d9ed;
-  font-size: 1.55cqw;
+  font-size: 1.7cqw;
   animation: story-enter 0.8s 0.85s both;
 }
-.goals-achievements {
-  display: flex;
-  justify-content: center;
-  gap: 1cqw;
-  max-width: 78cqw;
-}
-.goals-achievements > div {
-  min-width: 14cqw;
-  padding: 0.9cqw 1.3cqw;
+.goals-achievement-focus {
+  min-width: 46cqw;
+  margin-top: 1.2cqw;
+  padding: 1.3cqw 3cqw 1.5cqw;
   border: 1px solid #9ddcc04d;
-  border-radius: 0.8cqw;
-  background: #ffffff09;
+  border-radius: 1.2cqw;
+  background: linear-gradient(135deg, #9ddcc015, #ffffff08);
   display: grid;
-  gap: 0.2cqw;
-  animation: goals-achievement-in 0.7s calc(1s + var(--order) * 0.16s) both;
+  place-items: center;
+  gap: 0.35cqw;
+  box-shadow: 0 1.2cqw 4cqw #00000030;
+  animation: goals-achievement-in 0.7s 1s both;
 }
-.goals-achievements span {
+.goals-achievement-focus span {
   color: #9ddcc0;
-  font-size: 1cqw;
+  font-size: 1.65cqw;
   font-weight: 800;
-  letter-spacing: 0.1cqw;
+  letter-spacing: 0.16cqw;
   text-transform: uppercase;
 }
-.goals-achievements strong {
-  font-size: 2.5cqw;
-  line-height: 1.1;
+.goals-achievement-focus strong {
+  color: #9ddcc0;
+  font-size: 6.8cqw;
+  line-height: 1;
+  letter-spacing: -0.2cqw;
+  text-shadow: 0 0 2.5cqw #9ddcc040;
 }
-.goals-achievements small {
+.goals-achievement-focus small {
   color: #d2c9e1;
-  font-size: 0.9cqw;
+  font-size: 1.45cqw;
+}
+.goals-achievement-focus b {
+  color: #fff;
+  font-size: 1.75cqw;
 }
 .goals-confetti {
   position: absolute;
