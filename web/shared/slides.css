@@ -1307,12 +1307,166 @@
 .goals-footer > span:last-child {
   letter-spacing: 0.15cqw;
 }
+.goals-celebration {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 44%, #9ddcc038 0, transparent 32%),
+    radial-gradient(ellipse at 95% 0%, #65578c, transparent 50%), #282337;
+}
+.goals-celebration::after {
+  content: "";
+  position: absolute;
+  inset: 7cqw 22cqw 5cqw;
+  z-index: -1;
+  border-radius: 50%;
+  border: 1px solid #9ddcc02e;
+  box-shadow:
+    0 0 0 3cqw #9ddcc00b,
+    0 0 0 7cqw #8176b50a;
+  animation: goals-halo 4s ease-in-out infinite;
+}
+.goals-celebration-stage {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.goals-trophy {
+  width: 7cqw;
+  height: 7cqw;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.2cqw;
+  border: 1px solid #9ddcc080;
+  border-radius: 50%;
+  color: #282337;
+  background: #9ddcc0;
+  box-shadow: 0 0 3cqw #9ddcc05c;
+  font-size: 3.3cqw;
+  animation: goals-trophy-in 0.9s 0.2s cubic-bezier(0.2, 1.5, 0.5, 1) both;
+}
+.goals-celebration-kicker {
+  color: #9ddcc0;
+  font-size: 1.25cqw;
+  font-weight: 800;
+  letter-spacing: 0.38cqw;
+  animation: story-enter 0.7s 0.55s both;
+}
+.goals-celebration-stage h1 {
+  margin: 0.4cqw 0;
+  font-size: 5.8cqw;
+  line-height: 1;
+  letter-spacing: -0.2cqw;
+  animation: story-enter 0.8s 0.7s both;
+}
+.goals-celebration-stage > p {
+  max-width: 58cqw;
+  margin: 0.5cqw 0 1.8cqw;
+  color: #e0d9ed;
+  font-size: 1.55cqw;
+  animation: story-enter 0.8s 0.85s both;
+}
+.goals-achievements {
+  display: flex;
+  justify-content: center;
+  gap: 1cqw;
+  max-width: 78cqw;
+}
+.goals-achievements > div {
+  min-width: 14cqw;
+  padding: 0.9cqw 1.3cqw;
+  border: 1px solid #9ddcc04d;
+  border-radius: 0.8cqw;
+  background: #ffffff09;
+  display: grid;
+  gap: 0.2cqw;
+  animation: goals-achievement-in 0.7s calc(1s + var(--order) * 0.16s) both;
+}
+.goals-achievements span {
+  color: #9ddcc0;
+  font-size: 1cqw;
+  font-weight: 800;
+  letter-spacing: 0.1cqw;
+  text-transform: uppercase;
+}
+.goals-achievements strong {
+  font-size: 2.5cqw;
+  line-height: 1.1;
+}
+.goals-achievements small {
+  color: #d2c9e1;
+  font-size: 0.9cqw;
+}
+.goals-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.goals-confetti i {
+  position: absolute;
+  top: -3cqw;
+  left: var(--x);
+  width: 0.45cqw;
+  height: 0.9cqw;
+  border-radius: 0.1cqw;
+  background: #9ddcc0;
+  animation: goals-confetti-fall 4.8s var(--delay) linear infinite;
+}
+.goals-confetti i:nth-child(3n) {
+  background: #cec3f0;
+}
+.goals-confetti i:nth-child(3n + 1) {
+  background: #f0d68a;
+}
 @keyframes goals-fill {
   from {
     transform: scaleX(0);
   }
   to {
     transform: scaleX(1);
+  }
+}
+@keyframes goals-trophy-in {
+  from {
+    transform: scale(0) rotate(-25deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+@keyframes goals-achievement-in {
+  from {
+    transform: translateY(2cqw) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes goals-confetti-fall {
+  0% {
+    transform: translate3d(0, -4cqw, 0) rotate(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), 62cqw, 0) rotate(var(--turn));
+    opacity: 0.8;
+  }
+}
+@keyframes goals-halo {
+  50% {
+    transform: scale(1.05);
+    opacity: 0.65;
   }
 }
 @keyframes goals-ring-fill {

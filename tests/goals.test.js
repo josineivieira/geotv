@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { goalMetrics } from "../web/shared/goals.js";
 import { renderSlide, templateById } from "../web/shared/templates.js";
+import { presentationFrames } from "../web/shared/presentation.js";
 
 test("metas: calcula os percentuais da referência e limita o progresso visual", () => {
   assert.equal(goalMetrics(4000, 5720).percent, "69,93%");
@@ -44,4 +45,34 @@ test("metas: template disponível, valores editáveis e texto escapado", () => {
   assert.match(html, /&lt;Metas&gt;/);
   assert.match(html, /&lt;script&gt;/);
   assert.doesNotMatch(html, /O resultado de hoje vai além/);
+});
+
+test("metas: cria tela de celebração somente quando existe conquista", () => {
+  const achieved = presentationFrames({
+    id: "goal-1",
+    template: "goals",
+    duration: 20,
+    fields: { dailyCurrent: 110, dailyTarget: 100 },
+  });
+  assert.equal(achieved.length, 2);
+  assert.equal(achieved[0].duration, 12);
+  assert.equal(achieved[1].duration, 8);
+  assert.equal(achieved[1].fields.goalScene, "celebration");
+  assert.match(renderSlide(achieved[1]), /Parabéns, time!/);
+  assert.match(renderSlide(achieved[1]), /✓ Hoje/);
+
+  const pending = presentationFrames({
+    template: "goals",
+    fields: {
+      annualCurrent: 1,
+      annualTarget: 2,
+      monthlyCurrent: 1,
+      monthlyTarget: 2,
+      weeklyCurrent: 1,
+      weeklyTarget: 2,
+      dailyCurrent: 1,
+      dailyTarget: 2,
+    },
+  });
+  assert.equal(pending.length, 1);
 });

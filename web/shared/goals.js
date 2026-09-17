@@ -59,6 +59,30 @@ export function goalMetrics(current, target) {
           : `Faltam ${format(target - current)} para a meta`,
   };
 }
+export function goalFrames(content) {
+  const fields = { ...goalDefaults, ...content.fields };
+  const hasAchievement = goalPeriods.some(
+    ([key]) => goalMetrics(fields[`${key}Current`], fields[`${key}Target`]).met,
+  );
+  if (!hasAchievement) return [content];
+  const duration = Math.max(10, Number(content.duration) || 20);
+  return [
+    {
+      ...content,
+      id: `${content.id || "preview"}:goals:board`,
+      duration: duration * 0.6,
+      transition: "fade",
+      fields: { ...content.fields, goalScene: "board" },
+    },
+    {
+      ...content,
+      id: `${content.id || "preview"}:goals:celebration`,
+      duration: duration * 0.4,
+      transition: "zoom",
+      fields: { ...content.fields, goalScene: "celebration" },
+    },
+  ];
+}
 export function renderGoals(content, e) {
   const f = { ...goalDefaults, ...content.fields };
   const rows = goalPeriods.map(([key, label]) => ({
@@ -67,6 +91,15 @@ export function renderGoals(content, e) {
     ...goalMetrics(f[`${key}Current`], f[`${key}Target`]),
   }));
   const today = rows[3];
+  if (f.goalScene === "celebration") {
+    const achieved = rows.filter((row) => row.met);
+    const confetti = Array.from(
+      { length: 30 },
+      (_, i) =>
+        `<i style="--x:${(i * 37) % 100}%;--delay:${(i % 10) * 0.12}s;--drift:${(i % 2 ? 1 : -1) * (2 + (i % 5))}cqw;--turn:${180 + (i % 4) * 90}deg"></i>`,
+    ).join("");
+    return `<article class="tv-slide goals-slide goals-celebration"><div class="goals-confetti" aria-hidden="true">${confetti}</div><header class="goals-header"><img class="goals-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>DESEMPENHO / CONQUISTA</span></header><section class="goals-celebration-stage"><div class="goals-trophy" aria-hidden="true"><span>★</span></div><span class="goals-celebration-kicker">META BATIDA</span><h1>Parabéns, time!</h1><p>O resultado é de todos. Seguimos juntos, transformando esforço em conquista.</p><div class="goals-achievements">${achieved.map((row, i) => `<div style="--order:${i}"><span>✓ ${row.label}</span><strong>${row.percent}</strong><small>${row.gap}</small></div>`).join("")}</div></section><footer class="goals-footer"><span>${e(f.reference)}${content.demo ? " · DEMONSTRAÇÃO" : ""}</span><span>UM TIME. NOVAS CONQUISTAS.</span></footer></article>`;
+  }
   return `<article class="tv-slide goals-slide"><header class="goals-header"><img class="goals-logo" src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>DESEMPENHO / METAS</span></header><div class="goals-title"><div><span class="goals-kicker">CADA RESULTADO CONTA</span><h1>${e(content.title || "Na direção da meta")}</h1></div><span class="goals-unit">${e(f.unit)}</span></div><section class="goals-board"><div class="goals-periods">${rows
     .slice(0, 3)
     .map(
