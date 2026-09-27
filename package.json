@@ -14,7 +14,8 @@
     "format:check": "prettier --check server web tests scripts docs README.md package.json",
     "setup": "node scripts/setup.mjs",
     "migrate:mongodb": "node --env-file-if-exists=.env scripts/migrate-mongodb.mjs",
-    "test:mongodb": "node --test tests/mongodb.test.js"
+    "migrate:mongodb-media": "node --env-file-if-exists=.env scripts/migrate-mongodb-media.mjs",
+    "test:mongodb": "node --test tests/mongodb.test.js tests/mongo-storage.test.js"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

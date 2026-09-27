@@ -57,7 +57,7 @@ try {
     const result = await migrateSnapshot(target, snapshot);
     console.log(`Importação concluída e verificada. SHA-256: ${result.digest}`);
     console.log(
-      "Para ativar, use a mesma conexão em DATABASE_URL e reinicie o servidor. Preserve storage/media ou o Storage remoto atual.",
+      "Transfira também as mídias com npm run migrate:mongodb-media -- --apply --source-stopped. Depois use a mesma conexão em DATABASE_URL e reinicie o servidor.",
     );
   } else
     console.log(

@@ -1,4 +1,26 @@
-# GeoTV: Render + Supabase
+# GeoTV no Render
+
+## MongoDB Atlas: banco e mídias
+
+Com uma conexão `mongodb+srv://.../geotv` em `DATABASE_URL`, o GeoTV armazena os
+registros e os arquivos no MongoDB (GridFS). Esse modo não usa Supabase, mesmo
+que variáveis antigas `SUPABASE_*` ainda estejam cadastradas no Render.
+
+Use o runtime Docker, branch `main`, Dockerfile `./Dockerfile` e Health Check Path
+`/health`. Configure `PUBLIC_ORIGIN` com a URL HTTPS do serviço, sem barra final.
+O Dockerfile já configura `HOST=0.0.0.0` e `COOKIE_SECURE=true`; deixe o Render
+fornecer `PORT`. Autorize no Atlas as faixas de IP em **Connect → Outbound**.
+Publique o código atualizado e faça **Manual Deploy → Deploy latest commit**.
+
+Antes de ativar o novo armazenamento, transfira as mídias locais com
+`npm run migrate:mongodb-media -- --apply --source-stopped`, após parar a origem.
+O comando usa `MONGODB_URI` ou `DATABASE_URL`, verifica tamanho/SHA-256 e mantém
+os arquivos locais. Veja o procedimento completo em [MongoDB](MONGODB.md).
+
+Não é necessário Supabase Storage nem disco persistente no modo MongoDB.
+As seções seguintes documentam a alternativa PostgreSQL com Supabase.
+
+## Alternativa: PostgreSQL + Supabase
 
 O Render executa o servidor Node.js e o frontend via Docker. O Supabase armazena o PostgreSQL e as mídias. Com essa configuração, os dados persistentes não dependem do disco do Render. SQLite continua disponível somente para instalações locais sem `DATABASE_URL`.
 

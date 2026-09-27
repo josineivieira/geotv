@@ -6,6 +6,8 @@ Plataforma de canal interno digital com Admin autenticado e Player independente 
 
 Requer Node.js 24 ou superior. Sem `DATABASE_URL`, usa SQLite e arquivos locais. Com `DATABASE_URL`, aceita PostgreSQL ou MongoDB Atlas; veja [Render + Supabase](docs/RENDER.md) e [migração para MongoDB](docs/MONGODB.md). A instalação local não depende de banco externo.
 
+No modo MongoDB, imagens e vídeos também ficam no Atlas via GridFS. O Render não precisa de Supabase nesse modo. Transfira os arquivos locais com `npm run migrate:mongodb-media -- --apply --source-stopped` antes de ativar a nova versão; consulte o guia de migração.
+
 ```powershell
 npm ci
 npm run setup

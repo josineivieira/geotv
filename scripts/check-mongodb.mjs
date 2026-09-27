@@ -19,6 +19,20 @@ try {
     });
   console.log(`Conexão verificada. Banco: ${config.name}`);
   console.table(counts);
+  const media = await db
+    .collection("geotv_media.files")
+    .aggregate([
+      {
+        $group: {
+          _id: null,
+          arquivos: { $sum: 1 },
+          bytes: { $sum: "$length" },
+        },
+      },
+      { $project: { _id: 0 } },
+    ])
+    .toArray();
+  console.log("Mídias GridFS:", media[0] || { arquivos: 0, bytes: 0 });
 } catch (error) {
   console.error(
     `Conexão não verificada (${error.name}, código ${Number.isInteger(error.code) ? error.code : "indisponível"}). Confira credenciais, DNS e acesso de rede no Atlas.`,

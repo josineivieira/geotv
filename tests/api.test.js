@@ -21,10 +21,10 @@ async function apiFlow(t, backend) {
     env: {
       ...process.env,
       DATABASE_URL: replica?.getUri("api") || "",
-      SUPABASE_URL: "",
-      SUPABASE_SECRET_KEY: "",
+      SUPABASE_URL: replica ? "https://unused.invalid" : "",
+      SUPABASE_SECRET_KEY: replica ? "must-not-be-used" : "",
       SUPABASE_SERVICE_ROLE_KEY: "",
-      RENDER: "",
+      RENDER: replica ? "true" : "",
       PORT: String(port),
       HOST: "127.0.0.1",
       PUBLIC_ORIGIN: base,
