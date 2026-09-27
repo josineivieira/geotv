@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createDatabase, postgresConnection, postgresSql } from "./database.js";
+import { createMongoDatabase } from "./mongo-database.js";
 export const storage = resolve(process.env.GEOTV_STORAGE || "storage");
 mkdirSync(storage, { recursive: true });
 mkdirSync(resolve(storage, "media"), { recursive: true });
@@ -8,11 +9,18 @@ if (process.env.RENDER && !process.env.DATABASE_URL)
   throw new Error(
     "Configure DATABASE_URL no Render. SQLite local não será usado na nuvem.",
   );
-export const db = createDatabase(
-  process.env.DATABASE_URL
-    ? postgresConnection(process.env.DATABASE_URL, process.env.DATABASE_CA_CERT)
-    : { filename: resolve(storage, "geotv.sqlite") },
-);
+export const db = /^mongodb(?:\+srv)?:/.test(
+  process.env.DATABASE_URL?.trim() || "",
+)
+  ? await createMongoDatabase({ url: process.env.DATABASE_URL })
+  : createDatabase(
+      process.env.DATABASE_URL
+        ? postgresConnection(
+            process.env.DATABASE_URL,
+            process.env.DATABASE_CA_CERT,
+          )
+        : { filename: resolve(storage, "geotv.sqlite") },
+    );
 const schema = readFileSync(new URL("./schema.sql", import.meta.url), "utf8");
 export const now = () => new Date().toISOString();
 export const allContents = async () =>
@@ -51,7 +59,7 @@ await transaction(async () => {
         .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, "SERIAL PRIMARY KEY")
         .replace(/expires INTEGER/g, "expires BIGINT"),
     );
-  } else await db.exec(schema);
+  } else if (db.kind === "sqlite") await db.exec(schema);
   await db.prepare("INSERT OR IGNORE INTO settings VALUES(?,?)").run(
     "general",
     JSON.stringify({

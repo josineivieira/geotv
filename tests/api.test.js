@@ -5,14 +5,22 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { once } from "node:events";
-test("fluxo integrado de autorização, conteúdo, publicação, TV e restauração", async (t) => {
+import { MongoMemoryReplSet } from "mongodb-memory-server";
+async function apiFlow(t, backend) {
   const directory = await mkdtemp(join(tmpdir(), "geotv-test-"));
+  const replica =
+    backend === "mongodb"
+      ? await MongoMemoryReplSet.create({
+          replSet: { count: 1, storageEngine: "wiredTiger" },
+          instanceOpts: [{ launchTimeout: 60000 }],
+        })
+      : null;
   const port = 34000 + Math.floor(Math.random() * 10000);
   const base = `http://127.0.0.1:${port}`;
   const child = spawn(process.execPath, ["server/index.js"], {
     env: {
       ...process.env,
-      DATABASE_URL: "",
+      DATABASE_URL: replica?.getUri("api") || "",
       SUPABASE_URL: "",
       SUPABASE_SECRET_KEY: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
@@ -33,11 +41,12 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
   t.after(async () => {
     child.kill();
     await once(child, "exit").catch(() => {});
+    await replica?.stop();
     await rm(directory, { recursive: true, force: true });
   });
   for (
     let attempt = 0;
-    attempt < 100 && !output.includes("disponível em");
+    attempt < 300 && !output.includes("disponível em");
     attempt++
   )
     await new Promise((r) => setTimeout(r, 50));
@@ -239,7 +248,10 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
     timezone: "America/Sao_Paulo",
     approval: true,
   });
-  await call("/contents/" + c.id, "PUT", { ...c, title: "Alteração pendente" });
+  await call("/contents/" + c.id, "PUT", {
+    ...c,
+    title: "Alteração pendente",
+  });
   assert.equal(
     (await call("/publish", "POST", { devices: [device.id] })).response.status,
     400,
@@ -490,7 +502,9 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
   assert.equal(
     (
       await fetch(`${base}/api/player/${secondDevice.id}/snapshot`, {
-        headers: { Authorization: "Bearer " + secondDevice.url.split("#")[1] },
+        headers: {
+          Authorization: "Bearer " + secondDevice.url.split("#")[1],
+        },
       })
     ).status,
     401,
@@ -501,4 +515,7 @@ test("fluxo integrado de autorização, conteúdo, publicação, TV e restauraç
   );
   await call("/logout", "POST", {});
   assert.equal((await call("/state")).response.status, 401);
-});
+}
+for (const backend of ["sqlite", "mongodb"])
+  test(`${backend}: fluxo integrado de autorização, conteúdo, publicação, TV e restauração`, (t) =>
+    apiFlow(t, backend));

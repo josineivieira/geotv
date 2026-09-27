@@ -114,7 +114,11 @@ export async function upload(req, user, readBody) {
     });
   } catch (e) {
     await mediaStorage.remove(file).catch(() => {});
-    if (e.code === "23505" || e.code === "ERR_SQLITE_ERROR") {
+    if (
+      e.code === "23505" ||
+      e.code === "ERR_SQLITE_ERROR" ||
+      e.code === 11000
+    ) {
       const duplicate = await db
         .prepare("SELECT * FROM media WHERE hash=?")
         .get(hash);

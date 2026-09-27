@@ -12,15 +12,19 @@
     "test": "node --test tests/*.test.js",
     "format": "prettier --write server web tests scripts docs README.md package.json",
     "format:check": "prettier --check server web tests scripts docs README.md package.json",
-    "setup": "node scripts/setup.mjs"
+    "setup": "node scripts/setup.mjs",
+    "migrate:mongodb": "node --env-file-if-exists=.env scripts/migrate-mongodb.mjs",
+    "test:mongodb": "node --test tests/mongodb.test.js"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "mongodb-memory-server": "^11.3.0",
     "pdf-lib": "1.17.1",
     "prettier": "3.9.6"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
+    "mongodb": "^7.6.0",
     "pdfjs-dist": "6.3.289",
     "pg": "^8.23.0"
   }
