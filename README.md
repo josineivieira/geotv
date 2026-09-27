@@ -20,6 +20,9 @@ O `.env` local já foi criado neste workspace. Nenhuma senha padrão é incluíd
 
 ## Primeiro conteúdo na TV
 
+Para compartilhar um canal sem login, use **TVs → detalhes → Compartilhar link público**.
+Veja [link público e capa para o SharePoint](docs/PUBLIC-SHARING.md).
+
 1. Em **TVs → Nova TV**, cadastre nome e grupo. Guarde o link de ativação mostrado uma única vez.
 2. Em **Novo conteúdo**, escolha um modelo, preencha os campos e acompanhe o preview.
 3. Marque **Adicionar à programação** e salve.

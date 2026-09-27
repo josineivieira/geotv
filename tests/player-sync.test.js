@@ -4,6 +4,68 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 import { presentationFrames } from "../web/shared/presentation.js";
 
+test("canal público usa acesso anônimo e encerra reprodução ao revogar o link", async () => {
+  const source = (
+    await readFile(new URL("../web/player/watch.js", import.meta.url), "utf8")
+  ).replace(/^import .*;\r?\n/gm, "");
+  let status = 200,
+    cleared = 0;
+  const shown = [],
+    screen = {
+      innerHTML: "",
+      replaceChildren() {
+        cleared++;
+      },
+    };
+  const context = vm.createContext({
+    location: {
+      pathname: "/public/watch/public-id",
+      replace() {
+        throw new Error("Canal público não deve exigir login.");
+      },
+    },
+    document: { querySelector: () => screen, addEventListener() {} },
+    window: { addEventListener() {} },
+    AbortSignal,
+    Date,
+    setInterval: () => 1,
+    clearInterval() {},
+    createFramePresenter: () => ({
+      cancel() {},
+      preload() {},
+      show(c, effect, done) {
+        shown.push(c.id);
+        done();
+      },
+    }),
+    eligible: () => true,
+    presentationFrames: (c) => [c],
+    fetch: async (url, options) => {
+      assert.equal(url, "/api/public/channels/public-id");
+      assert.equal(options.credentials, "omit");
+      return {
+        status,
+        ok: status === 200,
+        json: async () => ({
+          version: 1,
+          settings: {},
+          alerts: [],
+          contents: [{ id: "published", duration: 20 }],
+        }),
+      };
+    },
+  });
+  vm.runInContext(source, context);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(shown, ["published"]);
+  status = 404;
+  await vm.runInContext("sync()", context);
+  assert.equal(cleared, 1);
+  assert.match(screen.innerHTML, /Canal público indisponível/);
+  vm.runInContext("tick()", context);
+  assert.equal(shown.length, 1);
+});
+
 test("canal percorre as três telas de resultados antes do próximo conteúdo", async () => {
   const source = (
     await readFile(new URL("../web/player/watch.js", import.meta.url), "utf8")

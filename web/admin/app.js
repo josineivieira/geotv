@@ -46,6 +46,28 @@ function closeModal() {
   modal.close();
   modal.innerHTML = "";
 }
+async function publicLinkDialog(id) {
+  const sharing = await request(
+    `/devices/${encodeURIComponent(id)}/public-link`,
+  );
+  showModal(
+    "Link público do canal",
+    `<p>Quando ativado, qualquer pessoa com o link pode assistir à programação publicada deste canal, sem login.</p><label class="check-label"><input type="checkbox" name="enabled" ${sharing.enabled ? "checked" : ""}> Permitir visualização pública</label><label>Link para compartilhar<input readonly value="${e(sharing.url)}"></label><p>Para mostrar uma capa no SharePoint, use este link. Você também pode escolher a imagem abaixo como miniatura personalizada.</p><a href="/assets/geotv-cover.png" target="_blank" rel="noopener"><img src="/assets/geotv-cover.png" alt="Capa da GeoTV" style="width:100%;border-radius:12px"></a><button class="primary">Salvar compartilhamento</button>`,
+    async (data) => {
+      const result = await request(
+        `/devices/${encodeURIComponent(id)}/public-link`,
+        "PUT",
+        { enabled: data.get("enabled") === "on" },
+      );
+      toast(
+        result.enabled ? "Link público ativado." : "Link público desativado.",
+      );
+      await publicLinkDialog(id);
+    },
+  );
+  modal.querySelector("input[readonly]").onclick = (event) =>
+    event.target.select();
+}
 export function showModal(title, body, onSubmit) {
   modal.innerHTML = `<form id="dialog-form"><div class="dialog-heading"><h2>${e(title)}</h2><button type="button" data-close aria-label="Fechar">×</button></div>${body}</form>`;
   modal.querySelector("[data-close]").onclick = closeModal;
@@ -364,6 +386,14 @@ async function action(name, node) {
           activation(r.url);
         },
       );
+      if (can("manage")) {
+        const share = document.createElement("button");
+        share.type = "button";
+        share.textContent = "Compartilhar link público";
+        share.onclick = () =>
+          publicLinkDialog(id).catch((error) => toast(error.message));
+        modal.querySelector("form").append(share);
+      }
       return;
     }
     case "urgent":

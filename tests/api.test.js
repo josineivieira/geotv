@@ -134,8 +134,73 @@ async function apiFlow(t, backend) {
     200,
   );
   assert.equal((await player()).contents.length, 0);
+  const publicPath = "/public/watch/" + device.id;
+  const publicApi = "/public/channels/" + device.id;
+  assert.equal((await call(publicApi, "GET", null, "")).response.status, 404);
+  assert.equal(
+    (
+      await call(
+        `/devices/${device.id}/public-link`,
+        "PUT",
+        { enabled: true },
+        "",
+      )
+    ).response.status,
+    401,
+  );
+  assert.equal(
+    (
+      await call(`/devices/${device.id}/public-link`, "PUT", {
+        enabled: "true",
+      })
+    ).response.status,
+    400,
+  );
+  assert.equal(
+    (await call(`/devices/${device.id}/public-link`, "PUT", { enabled: true }))
+      .data.enabled,
+    true,
+  );
+  assert.equal(
+    (await fetch(base + publicPath)).status,
+    404,
+    "unpublished channel stays unavailable",
+  );
   const p1 = (await call("/publish", "POST", { devices: [device.id] })).data;
   assert.equal(p1.id, 1);
+  const shared = await call(publicApi, "GET", null, "");
+  assert.equal(shared.response.status, 200);
+  assert.equal(shared.data.contents[0].id, c.id);
+  assert.equal(shared.data.contents[0].author, undefined);
+  assert.equal(shared.data.playlist, undefined);
+  assert.equal(shared.data.device, undefined);
+  assert.equal(shared.response.headers.get("cache-control"), "no-store");
+  const preview = await fetch(base + publicPath);
+  assert.equal(preview.status, 200);
+  const html = await preview.text();
+  assert.ok(
+    html.includes(
+      'property="og:image" content="' + base + '/assets/geotv-cover.png"',
+    ),
+  );
+  assert.ok(
+    html.includes('property="og:url" content="' + base + publicPath + '"'),
+  );
+  assert.ok(html.includes("TV Teste | GeoTV"));
+  const head = await fetch(base + publicPath, { method: "HEAD" });
+  assert.equal(head.status, 200);
+  assert.equal(await head.text(), "");
+  const cover = await fetch(base + "/assets/geotv-cover.png");
+  assert.equal(cover.status, 200);
+  const coverPng = Buffer.from(await cover.arrayBuffer());
+  assert.equal(coverPng.readUInt32BE(16), 1200);
+  assert.equal(coverPng.readUInt32BE(20), 630);
+  assert.equal((await call("/state", "GET", null, "")).response.status, 401);
+  assert.equal((await call("/channels", "GET", null, "")).response.status, 401);
+  await call(`/devices/${device.id}/public-link`, "PUT", { enabled: false });
+  assert.equal((await call(publicApi, "GET", null, "")).response.status, 404);
+  assert.equal((await fetch(base + publicPath)).status, 404);
+  await call(`/devices/${device.id}/public-link`, "PUT", { enabled: true });
   assert.equal(
     (await player()).contents[0].fields.participants,
     "Fabiola;50\nAna;40",
@@ -148,6 +213,12 @@ async function apiFlow(t, backend) {
     (await player()).contents[0].fields.participants,
     "Fabiola;50\nAna;40",
     "editar não modifica a TV",
+  );
+  assert.equal(
+    (await call(publicApi, "GET", null, "")).data.contents[0].fields
+      .participants,
+    "Fabiola;50\nAna;40",
+    "public view does not expose unpublished edits",
   );
   const p2 = (await call("/publish", "POST", { devices: [device.id] })).data;
   assert.equal(p2.id, 2);
@@ -218,6 +289,17 @@ async function apiFlow(t, backend) {
   );
   assert.equal(
     (await call("/users", "GET", null, editorCookie)).response.status,
+    403,
+  );
+  assert.equal(
+    (
+      await call(
+        `/devices/${device.id}/public-link`,
+        "PUT",
+        { enabled: false },
+        editorCookie,
+      )
+    ).response.status,
     403,
   );
   const badUpload = await fetch(base + "/api/media", {

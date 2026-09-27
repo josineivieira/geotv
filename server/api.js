@@ -15,6 +15,11 @@ import { string, validateContent } from "./validation.js";
 import { publish, deviceSnapshot, streams, notify } from "./publications.js";
 import { upload, deleteMedia } from "./media.js";
 import { publishedChannels } from "./channels.js";
+import {
+  publicChannel,
+  sharingStatus,
+  setChannelSharing,
+} from "./public-channels.js";
 import { convertPowerPoint, documentCapabilities } from "./documents.js";
 export async function readBody(req, limit = 128 * 1024, raw = false) {
   let size = 0;
@@ -146,6 +151,12 @@ export async function api(req, res, url) {
     }
     fail(405, "Método não permitido.");
   }
+  const publicMatch = path.match(/^\/api\/public\/channels\/([a-f0-9-]{36})$/);
+  if (publicMatch && method === "GET") {
+    const channel = await publicChannel(publicMatch[1]);
+    if (!channel) fail(404, "Canal público indisponível.");
+    return json(res, 200, channel);
+  }
   const user = await sessionUser(req);
   if (!user) fail(401, "Entre na sua conta para continuar.");
   if (path === "/api/me") return json(res, 200, user);
@@ -183,6 +194,20 @@ export async function api(req, res, url) {
     return json(res, 200, channel);
   }
   authorize(user, "read");
+  const sharingMatch = path.match(
+    /^\/api\/devices\/([a-f0-9-]{36})\/public-link$/,
+  );
+  if (sharingMatch && ["GET", "PUT"].includes(method)) {
+    authorize(user, "manage");
+    if (method === "GET")
+      return json(res, 200, await sharingStatus(sharingMatch[1]));
+    const body = await readBody(req);
+    return json(
+      res,
+      200,
+      await setChannelSharing(sharingMatch[1], body.enabled, user),
+    );
+  }
   const mediaDelete = path.match(/^\/api\/media\/([^/]+)$/);
   if (mediaDelete && method === "DELETE") {
     authorize(user, "edit");

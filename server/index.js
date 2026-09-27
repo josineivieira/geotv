@@ -6,6 +6,7 @@ import { api, json } from "./api.js";
 import { storage, transaction, db } from "./db.js";
 import { bootstrapAdmin } from "./security.js";
 import { mediaStorage } from "./storage.js";
+import { publicChannel, publicChannelHtml } from "./public-channels.js";
 await mediaStorage.initialize();
 await transaction(bootstrapAdmin);
 const web = resolve("web");
@@ -48,6 +49,20 @@ const server = createServer(async (req, res) => {
     if (!["GET", "HEAD"].includes(req.method))
       return json(res, 405, { error: "Método não permitido." });
     let route = decodeURIComponent(url.pathname);
+    if (route.startsWith("/public/watch/")) {
+      const match = route.match(/^\/public\/watch\/([a-f0-9-]{36})$/);
+      const channel = match ? await publicChannel(match[1]) : null;
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+      if (!channel)
+        return json(res, 404, { error: "Canal público indisponível." });
+      const html = publicChannelHtml(channel);
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Length": Buffer.byteLength(html),
+      });
+      return res.end(req.method === "HEAD" ? undefined : html);
+    }
     if (route.startsWith("/media/") && mediaStorage.remote)
       return await mediaStorage.serve(req, res, route.slice(7));
     let root = web;

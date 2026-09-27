@@ -1,7 +1,8 @@
 import { createFramePresenter } from "./frame-presenter.js";
 import { presentationFrames } from "/shared/presentation.js";
 import { eligible } from "/shared/schedule.js";
-const id = location.pathname.split("/")[2],
+const isPublic = location.pathname.startsWith("/public/watch/"),
+  id = location.pathname.split("/").at(-1),
   screen = document.querySelector("#screen");
 const presenter = createFramePresenter(screen);
 let channel = null,
@@ -58,15 +59,23 @@ async function sync() {
   if (busy) return;
   busy = true;
   try {
-    const res = await fetch("/api/channels/" + encodeURIComponent(id), {
-      cache: "no-store",
-      signal: AbortSignal.timeout(10000),
-    });
+    const res = await fetch(
+      (isPublic ? "/api/public/channels/" : "/api/channels/") +
+        encodeURIComponent(id),
+      {
+        credentials: isPublic ? "omit" : "same-origin",
+        cache: "no-store",
+        signal: AbortSignal.timeout(10000),
+      },
+    );
     if ([401, 403, 404].includes(res.status)) {
       channel = null;
       presenter.cancel();
       screen.replaceChildren();
-      location.replace("/");
+      if (isPublic)
+        screen.innerHTML =
+          '<div class="opening"><strong>geo<span>tv</span></strong><p>Canal público indisponível.</p></div>';
+      else location.replace("/");
       return;
     }
     if (!res.ok) throw new Error();
