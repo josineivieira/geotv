@@ -175,12 +175,11 @@ export function renderMonthlyResults(content, e) {
       const x = 12 + i * 82;
       const best = i === d.best;
       return `<g class="results-month ${best ? "is-best" : ""}" style="--order:${i}"><rect class="results-lane" x="${x - 6}" y="34" width="76" height="384" rx="14"/>${best ? `<text class="results-peak-label" x="${x + 31}" y="60" text-anchor="middle">DESTAQUE</text>` : ""}${[
-        i < d.months ? d.prior[i] : null,
-        i < d.months ? d.current[i] : null,
+        d.prior[i],
+        d.current[i],
       ]
         .map((value, j) => {
           const close =
-            i < d.months &&
             d.prior[i] !== null &&
             d.current[i] !== null &&
             Math.abs(y(d.prior[i]) - y(d.current[i])) < 25;

@@ -87,3 +87,18 @@ test("campo de comparação controla acumulado, período e meses exibidos", () =
   assert.equal(october.periodEnd, "Out");
   assert.equal(october.currentTotal, 4345);
 });
+
+test("gráfico mostra valores preenchidos após o período sem somá-los", () => {
+  const html = renderSlide({
+    template: "monthly-results",
+    fields: {
+      comparisonMonths: 9,
+      priorValues: "444,454,418,402,439,443,404,360,484,448",
+      currentValues: "419,417,450,379,475,456,651,563,535,0",
+    },
+  });
+  assert.match(html, /ACUMULADO · JAN–SET/);
+  assert.match(html, />4\.345</);
+  assert.match(html, />448</);
+  assert.match(html, />0</);
+});
