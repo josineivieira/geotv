@@ -36,20 +36,22 @@ test("crescimento: compara meses completos e divide em três telas legíveis", (
 });
 
 test("resultados mensais: aceita dados de janeiro a dezembro", () => {
-  const d = monthlyResultData();
+  const d = monthlyResultData({ comparisonMonths: 9 });
   assert.equal(d.currentTotal, 4001);
   assert.equal(d.priorTotal, 3848);
   assert.equal(d.best, 6);
   assert.ok(Math.abs(d.change - 3.97609147609148) < 0.00001);
   const extra = monthlyResultData({
+    comparisonMonths: 12,
     currentValues: "419,417,450,379,475,456,651,563,191,999,999,999",
+    priorValues: "444,454,418,402,439,443,404,360,484,100,100,100",
   });
   assert.deepEqual(extra.current.slice(9), [999, 999, 999]);
   assert.equal(extra.currentTotal, 6998);
 });
 
 test("resultados mensais: ignora valores ausentes no acumulado parcial", () => {
-  const d = monthlyResultData({ currentValues: "0,10,,30,-1,abc,40,50,60" });
+  const d = monthlyResultData({ comparisonMonths: 9, currentValues: "0,10,,30,-1,abc,40,50,60" });
   assert.equal(d.current[0], 0);
   assert.equal(d.current[2], null);
   assert.equal(d.current[4], null);
@@ -61,7 +63,7 @@ test("resultados mensais: renderiza doze meses e escapa campos", () => {
   const html = renderSlide({
     template: "monthly-results",
     title: "<Resultados>",
-    fields: { reference: "<script>" },
+    fields: { comparisonMonths: 9, reference: "<script>" },
   });
   assert.equal((html.match(/class="results-bar"/g) || []).length, 18);
   assert.match(html, /4\.001/);
@@ -70,4 +72,18 @@ test("resultados mensais: renderiza doze meses e escapa campos", () => {
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, />OUT<.*>NOV<.*>DEZ</s);
   assert.doesNotMatch(html, /NaN|Infinity/);
+});
+
+test("campo de comparação controla acumulado, período e meses exibidos", () => {
+  const september = monthlyResultData({ comparisonMonths: 9 });
+  assert.equal(september.periodEnd, "Set");
+  assert.equal(september.currentTotal, 4001);
+
+  const october = monthlyResultData({
+    comparisonMonths: 10,
+    priorValues: "444,454,418,402,439,443,404,360,484,448",
+    currentValues: "419,417,450,379,475,456,651,563,535,0",
+  });
+  assert.equal(october.periodEnd, "Out");
+  assert.equal(october.currentTotal, 4345);
 });

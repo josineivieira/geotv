@@ -114,6 +114,10 @@ function renderGrowth(content, e, scene) {
 }
 export function monthlyResultData(fields = {}) {
   const f = { ...monthlyResultDefaults, ...fields };
+  const months = Math.max(
+    1,
+    Math.min(12, Math.floor(Number(f.comparisonMonths) || 8)),
+  );
   const parse = (value) => {
     const cells = String(value).split(",").slice(0, 12);
     return resultMonths.map((_, i) => {
@@ -123,27 +127,33 @@ export function monthlyResultData(fields = {}) {
   };
   const prior = parse(f.priorValues),
     current = parse(f.currentValues);
+  const comparedPrior = prior.slice(0, months);
+  const comparedCurrent = current.slice(0, months);
   const sum = (values) => {
     const filled = values.filter((v) => v !== null);
     return filled.length && Number.isFinite(filled.reduce((a, b) => a + b, 0))
       ? filled.reduce((a, b) => a + b, 0)
       : null;
   };
-  const priorTotal = sum(prior),
-    currentTotal = sum(current);
+  const priorTotal = sum(comparedPrior),
+    currentTotal = sum(comparedCurrent);
   const change =
     priorTotal > 0 && currentTotal !== null
       ? (currentTotal / priorTotal - 1) * 100
       : null;
-  const best = current.reduce(
+  const best = comparedCurrent.reduce(
     (index, value, i) =>
       value !== null && (index === -1 || value > current[index]) ? i : index,
     -1,
   );
   return {
     f,
+    months,
+    periodEnd: resultMonths[months - 1],
     prior,
     current,
+    comparedPrior,
+    comparedCurrent,
     priorTotal,
     currentTotal,
     change: Number.isFinite(change) ? change : null,
@@ -158,23 +168,28 @@ export function renderMonthlyResults(content, e) {
   if (scene) return renderGrowth(content, e, scene);
   const d = monthlyResultData(content.fields);
   const display = (n) => (n === null ? "—" : fmt(n));
-  const ceiling = Math.max(1, ...d.prior, ...d.current);
+  const ceiling = Math.max(1, ...d.comparedPrior, ...d.comparedCurrent);
   const y = (value) => 370 - (value / ceiling) * 275;
   const bars = resultMonths
     .map((month, i) => {
       const x = 12 + i * 82;
       const best = i === d.best;
       return `<g class="results-month ${best ? "is-best" : ""}" style="--order:${i}"><rect class="results-lane" x="${x - 6}" y="34" width="76" height="384" rx="14"/>${best ? `<text class="results-peak-label" x="${x + 31}" y="60" text-anchor="middle">DESTAQUE</text>` : ""}${[
-        d.prior[i],
-        d.current[i],
+        i < d.months ? d.prior[i] : null,
+        i < d.months ? d.current[i] : null,
       ]
         .map((value, j) => {
           const close =
+            i < d.months &&
             d.prior[i] !== null &&
             d.current[i] !== null &&
             Math.abs(y(d.prior[i]) - y(d.current[i])) < 25;
           const labelY =
-            value === null ? 350 : y(value) - 14 - (close && j === 0 ? 23 : 0);
+            value === null
+              ? 350
+              : close
+                ? Math.min(y(d.prior[i]), y(d.current[i])) - 14 - (j === 0 ? 27 : 0)
+                : y(value) - 14;
           return `<g class="results-series-${j}">${value === null ? "" : `<rect class="results-bar" x="${x + j * 34}" y="${y(value)}" width="27" height="${370 - y(value)}" rx="6"/>`}<text x="${x + j * 34 + 13.5}" y="${labelY}" text-anchor="middle">${display(value)}</text></g>`;
         })
         .join(
@@ -188,8 +203,8 @@ export function renderMonthlyResults(content, e) {
       v === null || total === null ? (total = null) : (total += v),
     );
   };
-  const priorCurve = cumulative(d.prior),
-    currentCurve = cumulative(d.current);
+  const priorCurve = cumulative(d.comparedPrior),
+    currentCurve = cumulative(d.comparedCurrent);
   const curveMax = Math.max(1, ...priorCurve, ...currentCurve);
   const curve = (values, series) =>
     `<polyline class="results-curve results-series-${series}" points="${values
@@ -200,7 +215,6 @@ export function renderMonthlyResults(content, e) {
       .join(" ")}"/>`;
   const change =
     d.change === null ? "—" : `${d.change > 0 ? "+" : ""}${fmt(d.change)}%`;
-  const lastFilled = d.current.reduce((last, value, i) => value === null ? last : i, -1);
-  const accumulatedEnd = lastFilled < 0 ? "—" : resultMonths[lastFilled].toUpperCase();
-  return `<article class="tv-slide monthly-results"><header class="results-header"><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>RESULTADOS · JANEIRO A DEZEMBRO</span></header><div class="results-heading"><div><span class="results-kicker">O MOVIMENTO VIRA RESULTADO</span><h1>${e(content.title || "Nossa evolução, mês a mês")}</h1></div><div class="results-period">JAN <span>→</span> DEZ</div></div><section class="results-layout"><div class="results-chart-panel"><div class="results-chart-heading"><h2>Volume mensal</h2><div class="results-legend"><span><i></i>${e(d.f.priorYear)}</span><span><i></i>${e(d.f.currentYear)}</span></div></div><svg class="results-chart" viewBox="0 0 1000 440" role="img" aria-label="Volume mensal de janeiro a dezembro. Barras roxas: ${e(d.f.priorYear)}. Barras verdes: ${e(d.f.currentYear)}.">${[0, 0.5, 1].map((part) => `<line class="results-gridline" x1="10" x2="998" y1="${y(ceiling * part)}" y2="${y(ceiling * part)}"/>`).join("")}${bars}</svg><div class="results-chart-note"><span>Comparativo ${e(d.f.currentYear)} × ${e(d.f.priorYear)}</span><span>${e(d.f.reference)}</span></div></div><aside class="results-summary"><div class="results-total"><span>ACUMULADO · JAN–${accumulatedEnd}</span><strong>${display(d.currentTotal)}</strong><div class="results-change ${d.change !== null && d.change < 0 ? "is-down" : ""}">${change} <small>vs. ${e(d.f.priorYear)}</small></div><p>${e(d.f.priorYear)}: <b>${display(d.priorTotal)}</b></p></div><div class="results-cumulative"><h2>Ritmo acumulado</h2><svg viewBox="0 0 264 150" role="img" aria-label="Evolução acumulada de janeiro a dezembro">${curve(priorCurve, 0)}${curve(currentCurve, 1)}<text x="16" y="148">JAN</text><text x="221" y="148">DEZ</text></svg></div><div class="results-best"><span>DESTAQUE DE ${e(d.f.currentYear)}</span><strong>${d.best < 0 ? "—" : resultMonths[d.best]} <b>${d.best < 0 ? "—" : display(d.current[d.best])}</b></strong><span>Maior volume do período</span></div></aside></section><footer class="results-footer"><span>GeoTV · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "RESULTADOS GEOMARÍTIMA"}</span><span>JUNTOS, MOVIMENTAMOS RESULTADOS.</span></footer></article>`;
+  const accumulatedEnd = d.periodEnd.toUpperCase();
+  return `<article class="tv-slide monthly-results"><header class="results-header"><img src="/assets/geomaritima-logo.png" alt="GeoMarítima Multimodal"><span>RESULTADOS · JANEIRO A ${accumulatedEnd}</span></header><div class="results-heading"><div><span class="results-kicker">O MOVIMENTO VIRA RESULTADO</span><h1>${e(content.title || "Nossa evolução, mês a mês")}</h1></div><div class="results-period">JAN <span>→</span> ${accumulatedEnd}</div></div><section class="results-layout"><div class="results-chart-panel"><div class="results-chart-heading"><h2>Volume mensal</h2><div class="results-legend"><span><i></i>${e(d.f.priorYear)}</span><span><i></i>${e(d.f.currentYear)}</span></div></div><svg class="results-chart" viewBox="0 0 1000 440" role="img" aria-label="Volume mensal de janeiro a ${e(d.periodEnd)}. Barras roxas: ${e(d.f.priorYear)}. Barras verdes: ${e(d.f.currentYear)}.">${[0, 0.5, 1].map((part) => `<line class="results-gridline" x1="10" x2="998" y1="${y(ceiling * part)}" y2="${y(ceiling * part)}"/>`).join("")}${bars}</svg><div class="results-chart-note"><span>Comparativo ${e(d.f.currentYear)} × ${e(d.f.priorYear)}</span><span>${e(d.f.reference)}</span></div></div><aside class="results-summary"><div class="results-total"><span>ACUMULADO · JAN–${accumulatedEnd}</span><strong>${display(d.currentTotal)}</strong><div class="results-change ${d.change !== null && d.change < 0 ? "is-down" : ""}">${change} <small>vs. ${e(d.f.priorYear)}</small></div><p>${e(d.f.priorYear)}: <b>${display(d.priorTotal)}</b></p></div><div class="results-cumulative"><h2>Ritmo acumulado</h2><svg viewBox="0 0 264 150" role="img" aria-label="Evolução acumulada de janeiro a ${e(d.periodEnd)}">${curve(priorCurve, 0)}${curve(currentCurve, 1)}<text x="16" y="148">JAN</text><text x="221" y="148">${accumulatedEnd}</text></svg></div><div class="results-best"><span>DESTAQUE DE ${e(d.f.currentYear)}</span><strong>${d.best < 0 ? "—" : resultMonths[d.best]} <b>${d.best < 0 ? "—" : display(d.current[d.best])}</b></strong><span>Maior volume do período</span></div></aside></section><footer class="results-footer"><span>GeoTV · ${content.demo ? "DADOS DE DEMONSTRAÇÃO" : "RESULTADOS GEOMARÍTIMA"}</span><span>JUNTOS, MOVIMENTAMOS RESULTADOS.</span></footer></article>`;
 }
