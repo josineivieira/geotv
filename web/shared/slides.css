@@ -2345,3 +2345,143 @@
     animation: none !important;
   }
 }
+.port-alerts {
+  font-size: 1.65cqw;
+  background: #101b2c;
+  color: #fff;
+  padding: 3.5%;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  border-top: 7px solid #f5b83d;
+}
+.port-alerts header,
+.port-alerts footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2%;
+}
+.port-alerts header {
+  font-size: 0.85em;
+  letter-spacing: 0.1em;
+  color: #f5b83d;
+}
+.port-alerts header img {
+  width: 20%;
+  height: 4cqw;
+  object-fit: contain;
+  object-position: left center;
+  background: transparent;
+  padding: 0;
+}
+.port-alerts main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+}
+.port-heading > span {
+  color: #f5b83d;
+  letter-spacing: 0.2em;
+  font-size: 0.85em;
+}
+.port-alerts h1 {
+  font-size: 2.7em;
+  line-height: 1.08;
+  margin: 0.25em 0;
+}
+.port-heading p {
+  font-size: 1em;
+  color: #c5d0e0;
+  margin: 0.5em 0;
+}
+.port-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1em;
+}
+.port-kpis > div {
+  padding: 1em;
+  background: #1d2b40;
+  border-radius: 12px;
+  border-bottom: 4px solid #f5b83d;
+}
+.port-kpis strong {
+  display: block;
+  font-size: 3.1em;
+  color: #ffc85b;
+}
+.port-kpis span {
+  font-size: 0.85em;
+  color: #d6e0ee;
+}
+.port-alerts footer {
+  font-size: 0.65em;
+  color: #aebed2;
+  line-height: 1.5;
+  padding-top: 1em;
+}
+.port-alerts footer span {
+  max-width: 90%;
+  overflow-wrap: anywhere;
+}
+.port-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.port-list-heading h1 {
+  font-size: 1.8em;
+}
+.port-list-heading > span {
+  font-size: 0.55em;
+  color: #f5b83d;
+}
+.port-alerts table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.8em;
+}
+.port-alerts th {
+  text-align: left;
+  color: #9fb4cf;
+  font-size: 0.7em;
+  padding: 0.7em;
+}
+.port-alerts td {
+  padding: 0.7em;
+  border-top: 1px solid #34435a;
+  overflow: hidden;
+}
+.port-alerts th:nth-child(1) {
+  width: 18%;
+}
+.port-alerts th:nth-child(2) {
+  width: 17%;
+}
+.port-alerts th:nth-child(4) {
+  width: 14%;
+}
+.port-alerts td span,
+.port-alerts small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.port-alerts small {
+  color: #b0c0d6;
+  font-size: 0.75em;
+  margin-top: 0.4em;
+}
+.port-alerts td strong {
+  color: #ffcd69;
+  white-space: nowrap;
+}
+.port-alerts td .critical {
+  color: #ff827b;
+}

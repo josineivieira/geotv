@@ -2,6 +2,7 @@ import { storyCards, storyDefaults } from "./client-story.js";
 import { hydroFields, renderHydrology } from "./hydrology.js";
 import { salesFields, renderSales } from "./sales-show.js";
 import { alertFields, renderAlerts } from "./process-alerts.js";
+import { portFields, renderPort } from "./port-alerts.js";
 import { goalFields, renderGoals } from "./goals.js";
 import {
   monthlyResultFields,
@@ -35,6 +36,14 @@ const rankingFields = [
   ["campaignStatus", "Status da campanha"],
 ];
 export const templates = [
+  [
+    "port-alerts",
+    "Porto · pendentes de agendamento",
+    "Operações",
+    "port-alerts",
+    "purple",
+    portFields,
+  ],
   [
     "monthly-results",
     "Nossa evolução, mês a mês",
@@ -232,6 +241,8 @@ const number = (value) =>
     Number(value) || 0,
   );
 export function renderSlide(content) {
+  if (content.template === "port-alerts")
+    return renderPort(content, escapeHtml);
   if (content.template === "presentation" && content.slides?.length) {
     const first = content.slides[0];
     content = {

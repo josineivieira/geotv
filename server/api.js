@@ -280,7 +280,7 @@ export async function api(req, res, url) {
     });
   if (path === "/api/contents" && method === "POST") {
     authorize(user, "edit");
-    const input = await readBody(req);
+    const input = await readBody(req, 768 * 1024);
     const content = await validateContent({
       ...input,
       id: randomUUID(),
@@ -323,7 +323,7 @@ export async function api(req, res, url) {
       notify();
       return json(res, 200, { ok: true });
     }
-    const body = await readBody(req);
+    const body = await readBody(req, 768 * 1024);
     if (body.status === "Aprovado") authorize(user, "publish");
     if (body.status === "Publicado") body.status = "Rascunho";
     const content = await validateContent({

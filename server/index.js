@@ -66,6 +66,10 @@ const server = createServer(async (req, res) => {
     if (route.startsWith("/media/") && mediaStorage.remote)
       return await mediaStorage.serve(req, res, route.slice(7));
     let root = web;
+    if (route === "/vendor/xlsx/xlsx.mjs") {
+      root = resolve("node_modules/xlsx");
+      route = "/xlsx.mjs";
+    }
     if (route.startsWith("/vendor/pdfjs/")) {
       const relative = route.slice("/vendor/pdfjs/".length);
       if (

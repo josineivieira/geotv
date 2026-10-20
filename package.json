@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.116.0",
     "mongodb": "^7.6.0",
     "pdfjs-dist": "6.3.289",
-    "pg": "^8.23.0"
+    "pg": "^8.23.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

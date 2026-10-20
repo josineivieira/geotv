@@ -1,5 +1,6 @@
 import { request, toast } from "./api.js";
 import { uploadFile } from "./uploads.js";
+import { mountPortImport } from "./port-import.js";
 import { mountPresentationEditor } from "./presentation-editor.js";
 import {
   storyCards,
@@ -101,6 +102,7 @@ export function openEditor(original, state, onSaved) {
     { once: true },
   );
   const form = document.querySelector("#editor-form");
+  if (template.id === "port-alerts") mountPortImport({ form, dialog, content });
   const saveError = document.createElement("p");
   saveError.className = "editor-save-error";
   saveError.setAttribute("role", "alert");
@@ -239,6 +241,8 @@ export function openEditor(original, state, onSaved) {
     button.disabled = true;
     saveError.hidden = true;
     try {
+      if (template.id === "port-alerts" && !content.fields.portRecords)
+        throw new Error("Importe a planilha de pendências antes de salvar.");
       presentation?.validate();
       const saved = await request(
         "/contents" + (content.id ? "/" + content.id : ""),

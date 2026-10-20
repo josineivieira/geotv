@@ -2,10 +2,12 @@ import { storyFrames } from "./client-story.js";
 import { hydroFrames } from "./hydrology.js";
 import { salesFrames } from "./sales-show.js";
 import { alertFrames } from "./process-alerts.js";
+import { portFrames } from "./port-alerts.js";
 import { monthlyResultFrames } from "./monthly-results.js";
 import { goalFrames } from "./goals.js";
 export const transitions = ["fade", "slide", "zoom", "none"];
 export function presentationFrames(content) {
+  if (content.template === "port-alerts") return portFrames(content);
   if (content.template === "goals") return goalFrames(content);
   if (content.template === "monthly-results")
     return monthlyResultFrames(content);

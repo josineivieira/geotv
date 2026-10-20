@@ -1,6 +1,7 @@
 import { fail } from "./security.js";
 import { templates } from "../web/shared/templates.js";
 import { db } from "./db.js";
+import { isoDate, portFrames } from "../web/shared/port-alerts.js";
 export function string(value, name, max = 300, required = true) {
   if (
     typeof value !== "string" ||
@@ -22,6 +23,38 @@ export async function validateContent(input) {
   if (!templates.some((t) => t.id === c.template))
     fail(400, "Modelo inválido.");
   c.duration = Number(c.duration);
+  if (c.template === "port-alerts") {
+    let rows;
+    try {
+      rows = JSON.parse(c.fields?.portRecords);
+    } catch {
+      fail(400, "Importe uma planilha válida.");
+    }
+    if (
+      !Array.isArray(rows) ||
+      !rows.length ||
+      rows.length > 1000 ||
+      !isoDate(c.fields?.referenceDate)
+    )
+      fail(400, "Confira a planilha e a data de referência.");
+    const codes = new Set();
+    for (const r of rows) {
+      if (
+        !r ||
+        !isoDate(r.arrival) ||
+        ["code", "port", "sender", "recipient"].some(
+          (k) => typeof r[k] !== "string" || r[k].length > 500,
+        ) ||
+        !r.code.trim() ||
+        !r.port.trim() ||
+        codes.has(r.code)
+      )
+        fail(400, "Processo inválido ou duplicado na planilha.");
+      codes.add(r.code);
+    }
+    if (c.duration < portFrames(c).length * 5)
+      fail(400, "Use pelo menos 5 segundos por tela do porto.");
+  }
   if (c.template === "process-alerts") {
     if (c.duration < 25)
       fail(400, "Use pelo menos 25 segundos para as 5 telas de alertas.");
@@ -80,7 +113,8 @@ export async function validateContent(input) {
     !c.fields ||
     typeof c.fields !== "object" ||
     Array.isArray(c.fields) ||
-    JSON.stringify(c.fields).length > 30000
+    JSON.stringify(c.fields).length >
+      (c.template === "port-alerts" ? 600000 : 30000)
   )
     fail(400, "Campos inválidos.");
   for (const value of Object.values(c.fields))
