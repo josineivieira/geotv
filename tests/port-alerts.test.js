@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   importPortRows,
   portSummary,
+  portPages,
   isoDate,
 } from "../web/shared/port-alerts.js";
 import { presentationFrames } from "../web/shared/presentation.js";
@@ -14,6 +15,49 @@ const header = [
   "Remetente",
   "Destinatário",
 ];
+test("70 alertas: destaca top 5, limita 40 processos de 3 dias a 6 e preserva totais", () => {
+  const records = Array.from({ length: 70 }, (_, i) => ({
+    code: `CAB${String(i).padStart(3, "0")}`,
+    arrival: i < 40 ? "2026-10-17" : "2026-10-10",
+    port: "MANAUS",
+    sender: "A",
+    recipient: "B",
+  }));
+  const content = {
+    template: "port-alerts",
+    duration: 100,
+    fields: {
+      referenceDate: "2026-10-20",
+      portRecords: JSON.stringify(records),
+    },
+  };
+  const summary = portSummary(content.fields);
+  const pages = portPages(summary.rows);
+  const shown = pages.flatMap((p) => p.rows);
+  assert.equal(summary.rows.length, 70);
+  assert.equal(summary.critical, 30);
+  assert.equal(pages[0].top, true);
+  assert.deepEqual(pages[0].rows, summary.rows.slice(0, 5));
+  assert.equal(shown.filter((r) => r.days === 3).length, 6);
+  assert.equal(shown.filter((r) => r.days > 3).length, 30);
+  assert.equal(new Set(shown.map((r) => r.code)).size, 36);
+  const frames = presentationFrames(content);
+  assert.equal(frames.length, 8);
+  assert.match(renderSlide(frames[0]), /<strong>70<\/strong>/);
+  assert.match(renderSlide(frames[1]), /Os 5 mais críticos/);
+  assert.match(renderSlide(frames[1]), /36 de 70 alertas exibidos/);
+});
+test("limite de seis vale também quando todos têm três dias", () => {
+  const rows = Array.from({ length: 40 }, (_, i) => ({
+    code: `CAB${i}`,
+    days: 3,
+  }));
+  const pages = portPages(rows);
+  assert.equal(pages.flatMap((p) => p.rows).length, 6);
+  assert.equal(pages[0].rows.length, 5);
+  assert.equal(pages[1].rows.length, 1);
+  assert.deepEqual(portPages([]), []);
+});
 test("importação reconhece cabeçalhos, elimina duplicados e rejeita datas inválidas", () => {
   const row = ["CAB1", "17/10/2026", "MANAUS", "A", "B"];
   const result = importPortRows([["Relatório"], header, row, row]);
@@ -56,7 +100,7 @@ test("dias corridos, limites de alerta, datas futuras e paginação sem perda de
   assert.equal(summary.critical, 11);
   assert.equal(summary.max, 7);
   const frames = presentationFrames(content);
-  assert.equal(frames.length, 3);
+  assert.equal(frames.length, 4);
   assert.equal(
     frames.reduce((s, r) => s + r.duration, 0),
     60,

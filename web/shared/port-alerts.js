@@ -100,9 +100,24 @@ export function portSummary(fields) {
       : 0,
   };
 }
+export function portPages(rows) {
+  if (!rows.length) return [];
+  const top = rows.slice(0, 5);
+  let threeDays = top.filter((r) => r.days === 3).length;
+  const remaining = rows
+    .slice(5)
+    .filter((r) => r.days !== 3 || ++threeDays <= 6);
+  const pages = [{ title: "Os 5 mais críticos", top: true, rows: top }];
+  for (let i = 0; i < remaining.length; i += 6)
+    pages.push({
+      title: "Prioridade de agendamento",
+      top: false,
+      rows: remaining.slice(i, i + 6),
+    });
+  return pages;
+}
 export function portFrames(content) {
-  const count =
-    1 + Math.ceil(portSummary(content.fields || {}).rows.length / 6);
+  const count = 1 + portPages(portSummary(content.fields || {}).rows).length;
   return Array.from({ length: count }, (_, i) => ({
     ...content,
     id: `${content.id || "preview"}:port:${i}`,
@@ -115,7 +130,10 @@ export function renderPort(content, e) {
   const f = content.fields || {},
     s = portSummary(f),
     scene = Number(f.portScene) || 0;
-  const count = 1 + Math.ceil(s.rows.length / 6);
+  const pages = portPages(s.rows);
+  const count = 1 + pages.length;
+  const page = pages[scene - 1];
+  const displayed = pages.reduce((sum, p) => sum + p.rows.length, 0);
   const body =
     scene === 0
       ? `<div class="port-heading"><span>ATENÇÃO, OPERAÇÃO</span><h1>Parados no porto.<br>Agendamento pendente.</h1><p>Processos no destino há 3 dias ou mais sem agendamento de entrega.</p></div><div class="port-kpis">${[
@@ -130,12 +148,13 @@ export function renderPort(content, e) {
           .join(
             "",
           )}</div>${!s.total ? "<p>Importe a planilha de pendências para gerar a apresentação.</p>" : !s.rows.length ? "<p>Nenhum processo com 3 dias ou mais nesta base.</p>" : ""}`
-      : `<div class="port-list-heading"><h1>Prioridade de agendamento</h1><span>MAIOR TEMPO PARADO PRIMEIRO</span></div><table><thead><tr><th>Processo / chegada</th><th>Porto</th><th>Remetente / destinatário</th><th>Parado há</th></tr></thead><tbody>${s.rows
-          .slice((scene - 1) * 6, scene * 6)
+      : `<div class="port-list-heading"><h1>${e(page?.title || "Prioridade de agendamento")}</h1><span>${page?.top ? "AÇÃO PRIORITÁRIA · MAIOR TEMPO PARADO" : "MAIOR TEMPO PARADO PRIMEIRO"}</span></div><table class="${page?.top ? "port-top-five" : ""}"><thead><tr><th>Processo / chegada</th><th>Porto</th><th>Remetente / destinatário</th><th>Parado há</th></tr></thead><tbody>${(
+          page?.rows || []
+        )
           .map(
             (r) =>
               `<tr><td><b>${e(r.code)}</b><small>${e(r.arrival.split("-").reverse().join("/"))}</small></td><td>${e(r.port)}</td><td><span>${e(r.sender)}</span><small>${e(r.recipient)}</small></td><td><strong class="${r.days >= 7 ? "critical" : ""}">${r.days} dias</strong></td></tr>`,
           )
           .join("")}</tbody></table>`;
-  return `<article class="tv-slide port-alerts"><header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima"><b>OPERAÇÕES &nbsp; / &nbsp; PENDENTE AGENDAMENTO</b></header><main>${body}</main><footer><span>Base: ${e(f.sourceName || "sem planilha")} · Referência: ${e(f.referenceDate || "—")}<br>${s.total} processos importados${s.invalid ? ` · ${s.invalid} datas futuras excluídas` : ""}</span><b>${scene + 1} / ${count}</b></footer></article>`;
+  return `<article class="tv-slide port-alerts"><header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima"><b>OPERAÇÕES &nbsp; / &nbsp; PENDENTE AGENDAMENTO</b></header><main>${body}</main><footer><span>Base: ${e(f.sourceName || "sem planilha")} · Referência: ${e(f.referenceDate || "—")}<br>${s.total} processos importados${displayed < s.rows.length ? ` · ${displayed} de ${s.rows.length} alertas exibidos · até 6 processos com 3 dias` : ""}${s.invalid ? ` · ${s.invalid} datas futuras excluídas` : ""}</span><b>${scene + 1} / ${count}</b></footer></article>`;
 }

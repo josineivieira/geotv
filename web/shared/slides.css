@@ -2485,3 +2485,10 @@
 .port-alerts td .critical {
   color: #ff827b;
 }
+.port-alerts .port-top-five td {
+  background: rgba(245, 184, 61, 0.09);
+  border-top-color: #9a7438;
+}
+.port-alerts .port-top-five td:first-child {
+  border-left: 4px solid #f5b83d;
+}

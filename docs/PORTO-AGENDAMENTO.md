@@ -15,3 +15,5 @@ As colunas obrigatórias são Código do processo, Dt. chegada, Porto de destino
 O cálculo usa dias corridos, com chegada como dia zero. A partir de 3 dias entra em alerta; a partir de 7 recebe destaque crítico. A média e o maior tempo consideram somente os processos em alerta. Há uma tela de resumo e páginas de seis processos, ordenados pelo maior tempo parado. A duração sugerida é dez segundos por tela, ajustável respeitando o mínimo de cinco.
 
 Os dados importados ficam no conteúdo salvo e na publicação, permitindo reprodução offline pelo player. A leitura do Excel ocorre no navegador, com a biblioteca servida pelo próprio GeoTV.
+
+A primeira tela de detalhes destaca os cinco processos com maior tempo parado, sem repeti-los nas páginas seguintes. Os processos com exatamente três dias ficam limitados a seis em toda a apresentação. Os demais continuam aparecendo, com seis por página. Os totais, a média e o maior tempo do resumo consideram toda a base, e o rodapé informa quando apenas parte dos alertas está sendo exibida.
