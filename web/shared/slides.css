@@ -2492,3 +2492,16 @@
 .port-alerts .port-top-five td:first-child {
   border-left: 4px solid #f5b83d;
 }
+
+.port-alerts .port-schedule-warning {
+  margin: 0;
+  padding: 0.7em 1em;
+  background: #49252b;
+  border-left: 5px solid #ff837c;
+  color: #ffe1dd;
+  font-size: 0.9em;
+}
+.port-alerts .port-schedule-flag {
+  color: #ffaaa3;
+  font-weight: 700;
+}

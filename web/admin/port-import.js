@@ -6,7 +6,7 @@ import {
 import { renderSlide } from "/shared/templates.js";
 export function mountPortImport({ form, dialog, content }) {
   const holder = document.createElement("section");
-  holder.innerHTML = `<label class="upload-button">Importar / substituir planilha<input type="file" accept=".xls,.xlsx" data-port-file></label><p class="hint">Use a exportação PENDENTE AGENDAMENTO do ERP. Cada importação substitui a base inteira. Dias corridos desde a chegada: alerta ≥ 3 dias; crítico ≥ 7 dias.</p><p data-port-status role="status"></p><p class="hint">Depois de importar, salve e publique a programação para atualizar as TVs.</p>`;
+  holder.innerHTML = `<label class="upload-button">Importar / substituir planilha<input type="file" accept=".xls,.xlsx" data-port-file></label><p class="hint">Use a exportação PENDENTE AGENDAMENTO do ERP. Entregas programadas sem data de descarga recebem destaque, inclusive antes de 3 dias. Cada importação substitui a base inteira. Dias corridos desde a chegada: alerta ≥ 3 dias; crítico ≥ 7 dias.</p><p data-port-status role="status"></p><p class="hint">Depois de importar, salve e publique a programação para atualizar as TVs.</p>`;
   form.querySelector(".editor-fields h3").after(holder);
   const status = holder.querySelector("[data-port-status]");
   const dateInput = form.elements.field_referenceDate;
@@ -20,7 +20,7 @@ export function mountPortImport({ form, dialog, content }) {
   content.fields.referenceDate = dateInput.value;
   const update = () => {
     const s = portSummary(content.fields);
-    status.textContent = `${s.total} processos · ${s.rows.length} em alerta · ${s.critical} críticos${s.invalid ? ` · ${s.invalid} datas futuras excluídas (confira a referência)` : ""}`;
+    status.textContent = `${s.total} processos · ${s.rows.length} em alerta · ${s.critical} críticos · ${s.missingSchedule.length} entregas programadas sem data${s.invalid ? ` · ${s.invalid} datas futuras excluídas (confira a referência)` : ""}`;
   };
   update();
   let timer;

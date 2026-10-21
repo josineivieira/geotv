@@ -110,3 +110,56 @@ test("dias corridos, limites de alerta, datas futuras e paginação sem perda de
   assert.ok(html.includes("&lt;script&gt;"));
   assert.ok(!html.includes("<script>"));
 });
+
+test("programada sem data recebe atenção antes de três dias; agendadas saem das pendências", () => {
+  const result = importPortRows([
+    [...header, "Situação", "Dt. agendamento descarga"],
+    ["NOVO", "20/10/2026", "SUAPE", "A", "B", "ENTREGA PROGRAMADA", ""],
+    [
+      "ANTIGO",
+      "01/10/2026",
+      "SUAPE",
+      "A",
+      "B",
+      "ENTREGA PROGRAMADA",
+      "22/10/2026",
+    ],
+    [
+      "PENDENTE",
+      "10/10/2026",
+      "SUAPE",
+      "A",
+      "B",
+      "PENDENTE DE AGENDAMENTO",
+      "",
+    ],
+  ]);
+  const fields = {
+    referenceDate: "2026-10-21",
+    portRecords: JSON.stringify(result.records),
+  };
+  const summary = portSummary(fields);
+  assert.deepEqual(
+    summary.rows.map((r) => r.code),
+    ["PENDENTE"],
+  );
+  assert.deepEqual(
+    summary.missingSchedule.map((r) => r.code),
+    ["NOVO"],
+  );
+  const pages = portPages(summary.rows, summary.missingSchedule);
+  assert.equal(pages[0].attention, true);
+  const content = { template: "port-alerts", duration: 60, fields };
+  const frames = presentationFrames(content);
+  assert.match(
+    renderSlide(frames[0]),
+    /1 entrega\(s\) programada\(s\) sem data/,
+  );
+  assert.match(renderSlide(frames[1]), /PROGRAMADA SEM DATA/);
+  assert.ok(!frames.map(renderSlide).join("").includes("ANTIGO"));
+  const many = Array.from({ length: 20 }, (_, i) => ({
+    code: `C${i}`,
+    days: 3,
+  }));
+  assert.equal(portPages([], many).flatMap((p) => p.rows).length, 20);
+});

@@ -43,6 +43,15 @@ export function importPortRows(table) {
     );
   const records = [],
     seen = new Set();
+  const names = table[header].map(normalize);
+  const situationColumn = names.indexOf("situacao");
+  const scheduledColumn = names.findIndex((n) =>
+    [
+      "dtagendamentodescarga",
+      "datadeagendamentodescarga",
+      "dataagendamentodescarga",
+    ].includes(n),
+  );
   let duplicates = 0;
   for (const [index, row] of table.slice(header + 1).entries()) {
     if (!row.some((v) => String(v ?? "").trim())) continue;
@@ -57,7 +66,21 @@ export function importPortRows(table) {
       continue;
     }
     seen.add(code);
-    records.push({ code, arrival: isoDate(arrival), port, sender, recipient });
+    const situation = String(row[situationColumn] ?? "").trim();
+    const scheduled = String(row[scheduledColumn] ?? "").trim();
+    if (scheduled && !isoDate(scheduled))
+      throw new Error(
+        `Linha ${header + index + 2}: confira a data de agendamento descarga. Nenhum dado foi substituído.`,
+      );
+    records.push({
+      code,
+      arrival: isoDate(arrival),
+      port,
+      sender,
+      recipient,
+      situation,
+      scheduledDate: isoDate(scheduled),
+    });
   }
   if (!records.length) throw new Error("A planilha não contém processos.");
   if (records.length > 1000)
@@ -71,10 +94,20 @@ export function portSummary(fields) {
     records = JSON.parse(fields.portRecords || "[]");
   } catch {}
   if (!Array.isArray(records) || !date)
-    return { rows: [], total: 0, invalid: 0, critical: 0, max: 0, average: 0 };
+    return {
+      rows: [],
+      missingSchedule: [],
+      total: 0,
+      invalid: 0,
+      critical: 0,
+      max: 0,
+      average: 0,
+    };
   let invalid = 0;
+  const missingSchedule = [];
   const rows = records
     .flatMap((r) => {
+      if (r.scheduledDate) return [];
       const arrival = isoDate(r.arrival);
       const days = arrival
         ? Math.round((Date.parse(date) - Date.parse(arrival)) / 86400000)
@@ -83,12 +116,18 @@ export function portSummary(fields) {
         invalid++;
         return [];
       }
-      return [{ ...r, days }];
+      const record = { ...r, days };
+      if (normalize(r.situation) === "entregaprogramada")
+        missingSchedule.push(record);
+      return [record];
     })
     .filter((r) => r.days >= 3)
     .sort((a, b) => b.days - a.days || a.code.localeCompare(b.code));
   return {
     rows,
+    missingSchedule: missingSchedule.sort(
+      (a, b) => b.days - a.days || a.code.localeCompare(b.code),
+    ),
     total: records.length,
     invalid,
     critical: rows.filter((r) => r.days >= 7).length,
@@ -100,8 +139,15 @@ export function portSummary(fields) {
       : 0,
   };
 }
-export function portPages(rows) {
-  if (!rows.length) return [];
+export function portPages(rows, missingSchedule = []) {
+  const attentionPages = [];
+  for (let i = 0; i < missingSchedule.length; i += 6)
+    attentionPages.push({
+      title: "Entrega programada sem data",
+      attention: true,
+      rows: missingSchedule.slice(i, i + 6),
+    });
+  if (!rows.length) return attentionPages;
   const top = rows.slice(0, 5);
   let threeDays = top.filter((r) => r.days === 3).length;
   const remaining = rows
@@ -114,10 +160,11 @@ export function portPages(rows) {
       top: false,
       rows: remaining.slice(i, i + 6),
     });
-  return pages;
+  return [...attentionPages, ...pages];
 }
 export function portFrames(content) {
-  const count = 1 + portPages(portSummary(content.fields || {}).rows).length;
+  const summary = portSummary(content.fields || {});
+  const count = 1 + portPages(summary.rows, summary.missingSchedule).length;
   return Array.from({ length: count }, (_, i) => ({
     ...content,
     id: `${content.id || "preview"}:port:${i}`,
@@ -130,10 +177,12 @@ export function renderPort(content, e) {
   const f = content.fields || {},
     s = portSummary(f),
     scene = Number(f.portScene) || 0;
-  const pages = portPages(s.rows);
+  const pages = portPages(s.rows, s.missingSchedule);
   const count = 1 + pages.length;
   const page = pages[scene - 1];
-  const displayed = pages.reduce((sum, p) => sum + p.rows.length, 0);
+  const displayed = pages
+    .filter((p) => !p.attention)
+    .reduce((sum, p) => sum + p.rows.length, 0);
   const body =
     scene === 0
       ? `<div class="port-heading"><span>ATENÇÃO, OPERAÇÃO</span><h1>Parados no porto.<br>Agendamento pendente.</h1><p>Processos no destino há 3 dias ou mais sem agendamento de entrega.</p></div><div class="port-kpis">${[
@@ -147,13 +196,13 @@ export function renderPort(content, e) {
           )
           .join(
             "",
-          )}</div>${!s.total ? "<p>Importe a planilha de pendências para gerar a apresentação.</p>" : !s.rows.length ? "<p>Nenhum processo com 3 dias ou mais nesta base.</p>" : ""}`
-      : `<div class="port-list-heading"><h1>${e(page?.title || "Prioridade de agendamento")}</h1><span>${page?.top ? "AÇÃO PRIORITÁRIA · MAIOR TEMPO PARADO" : "MAIOR TEMPO PARADO PRIMEIRO"}</span></div><table class="${page?.top ? "port-top-five" : ""}"><thead><tr><th>Processo / chegada</th><th>Porto</th><th>Remetente / destinatário</th><th>Parado há</th></tr></thead><tbody>${(
+          )}</div>${s.missingSchedule.length ? `<p class="port-schedule-warning"><b>ATENÇÃO: ${s.missingSchedule.length} entrega(s) programada(s) sem data de descarga.</b> Confira e preencha o agendamento no ERP.</p>` : ""}${!s.total ? "<p>Importe a planilha de pendências para gerar a apresentação.</p>" : !s.rows.length ? "<p>Nenhum processo com 3 dias ou mais nesta base.</p>" : ""}`
+      : `<div class="port-list-heading"><h1>${e(page?.title || "Prioridade de agendamento")}</h1><span>${page?.attention ? "PREENCHER DATA DE AGENDAMENTO DESCARGA" : page?.top ? "AÇÃO PRIORITÁRIA · MAIOR TEMPO PARADO" : "MAIOR TEMPO PARADO PRIMEIRO"}</span></div><table class="${page?.attention ? "PREENCHER DATA DE AGENDAMENTO DESCARGA" : page?.top ? "port-top-five" : ""}"><thead><tr><th>Processo / chegada</th><th>Porto</th><th>Remetente / destinatário</th><th>Parado há</th></tr></thead><tbody>${(
           page?.rows || []
         )
           .map(
             (r) =>
-              `<tr><td><b>${e(r.code)}</b><small>${e(r.arrival.split("-").reverse().join("/"))}</small></td><td>${e(r.port)}</td><td><span>${e(r.sender)}</span><small>${e(r.recipient)}</small></td><td><strong class="${r.days >= 7 ? "critical" : ""}">${r.days} dias</strong></td></tr>`,
+              `<tr><td><b>${e(r.code)}</b>${normalize(r.situation) === "entregaprogramada" ? `<small class="port-schedule-flag">PROGRAMADA SEM DATA</small>` : ""}<small>${e(r.arrival.split("-").reverse().join("/"))}</small></td><td>${e(r.port)}</td><td><span>${e(r.sender)}</span><small>${e(r.recipient)}</small></td><td><strong class="${r.days >= 7 ? "critical" : ""}">${r.days} dias</strong></td></tr>`,
           )
           .join("")}</tbody></table>`;
   return `<article class="tv-slide port-alerts"><header><img src="/assets/geomaritima-logo.png" alt="GeoMarítima"><b>OPERAÇÕES &nbsp; / &nbsp; PENDENTE AGENDAMENTO</b></header><main>${body}</main><footer><span>Base: ${e(f.sourceName || "sem planilha")} · Referência: ${e(f.referenceDate || "—")}<br>${s.total} processos importados${displayed < s.rows.length ? ` · ${displayed} de ${s.rows.length} alertas exibidos · até 6 processos com 3 dias` : ""}${s.invalid ? ` · ${s.invalid} datas futuras excluídas` : ""}</span><b>${scene + 1} / ${count}</b></footer></article>`;
